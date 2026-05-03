@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { writeFile } from 'fs/promises';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
 import chalk from 'chalk';
 import { chromium } from 'playwright';
 import { instagramCookiesPath } from '../providers/instagram';
@@ -12,6 +13,9 @@ type PlaywrightCookie = {
   expires: number;
   secure: boolean;
 };
+
+export const browserStatePath = (vaultPath: string) =>
+  join(vaultPath, 'System', 'browser-state');
 
 const toCookiesTxt = (cookies: PlaywrightCookie[]): string => {
   const lines = ['# Netscape HTTP Cookie File', ''];
@@ -30,40 +34,48 @@ export const runInstagramAuth = async (vaultPath: string): Promise<void> => {
   console.log(chalk.cyan('Opening Instagram login page...'));
   console.log(
     chalk.yellow(
-      'Log in to Instagram in the browser window. The window will close automatically.\n',
+      'Log in to Instagram in the browser window. It will close automatically once you are logged in.\n',
     ),
   );
 
-  const browser = await chromium.launch({ headless: false });
-  const context = await browser.newContext();
-  const page = await context.newPage();
+  const statePath = browserStatePath(vaultPath);
+  await mkdir(statePath, { recursive: true });
 
+  // Persistent context: browser state is saved between runs so login is remembered
+  const context = await chromium.launchPersistentContext(statePath, {
+    headless: false,
+  });
+
+  const page = await context.newPage();
   await page.goto('https://www.instagram.com/accounts/login/');
   await page.bringToFront();
 
-  // Wait until fully past login — home feed or explore, not an interstitial
   await page.waitForURL(
     url => {
       const u = url.toString();
-      return !u.includes('/accounts/login') && !u.includes('/accounts/onetap');
+      return (
+        !u.includes('/accounts/login') &&
+        !u.includes('/accounts/onetap') &&
+        !u.includes('/challenge')
+      );
     },
     { timeout: 180_000 },
   );
 
-  // Let the session settle so all auth cookies are written
   await page.waitForTimeout(2000);
 
+  // Export session cookies to Netscape format for yt-dlp
   const cookies = await context.cookies(['https://www.instagram.com']);
-  await browser.close();
+  await context.close();
 
   const cookiesTxt = toCookiesTxt(cookies as PlaywrightCookie[]);
   await writeFile(instagramCookiesPath(vaultPath), cookiesTxt, 'utf-8');
 
-  console.log(chalk.green('✓ Instagram cookies saved.\n'));
+  console.log(chalk.green('✓ Instagram session saved.\n'));
 };
 
 const instagramCommand = new Command('instagram')
-  .description('Log in to Instagram and save cookies for ingestion')
+  .description('Log in to Instagram and save session for ingestion')
   .action(async () => {
     const { config } = await import('../config');
     await runInstagramAuth(config.vaultPath);

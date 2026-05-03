@@ -8,7 +8,11 @@ import { generateId } from '../utils/id';
 import { ensureVaultDirs, sourceExists, saveSource } from '../utils/vault';
 import { markSourceIngested } from '../utils/system';
 import { fetchYouTube } from '../providers/youtube';
-import { fetchInstagram, instagramCookiesPath } from '../providers/instagram';
+import {
+  fetchInstagram,
+  instagramCookiesPath,
+  InstagramAuthError,
+} from '../providers/instagram';
 import { runInstagramAuth } from './auth';
 
 export const runIngest = async (): Promise<void> => {
@@ -93,7 +97,19 @@ export const runIngest = async (): Promise<void> => {
       if (normalized.source === 'youtube') {
         data = await fetchYouTube(id, normalized.url);
       } else if (normalized.source === 'instagram') {
-        data = await fetchInstagram(id, normalized.url, vaultPath);
+        try {
+          data = await fetchInstagram(id, normalized.url, vaultPath);
+        } catch (err) {
+          if (err instanceof InstagramAuthError) {
+            console.log(
+              chalk.yellow('\n  Session expired — re-authenticating...'),
+            );
+            await runInstagramAuth(vaultPath);
+            data = await fetchInstagram(id, normalized.url, vaultPath);
+          } else {
+            throw err;
+          }
+        }
       } else {
         throw new Error(`Provider not yet implemented: ${normalized.source}`);
       }
