@@ -27,7 +27,7 @@ const DEFAULTS = {
 };
 
 const systemPath = (vaultPath: string, file: string) =>
-  join(vaultPath, 'System', file);
+  join(vaultPath, '.system', file);
 
 const readJson = async <T>(path: string, fallback: () => T): Promise<T> => {
   try {

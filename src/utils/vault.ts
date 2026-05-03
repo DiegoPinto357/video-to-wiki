@@ -5,18 +5,16 @@ import { initSystemFiles } from './system';
 
 export const ensureVaultDirs = async (vaultPath: string): Promise<void> => {
   const dirs = [
-    join(vaultPath, 'Inbox'),
-    join(vaultPath, 'Sources', 'raw'),
-    join(vaultPath, 'Docs'),
-    join(vaultPath, 'System'),
-    join(vaultPath, 'Backup', 'Docs'),
+    join(vaultPath, '_inbox'),
+    join(vaultPath, '.system', 'sources', 'raw'),
+    join(vaultPath, '.system', 'backup', 'docs'),
   ];
   await Promise.all(dirs.map(d => mkdir(d, { recursive: true })));
   await initSystemFiles(vaultPath);
 };
 
 export const getSourcePath = (vaultPath: string, id: string): string =>
-  join(vaultPath, 'Sources', 'raw', `${id}.json`);
+  join(vaultPath, '.system', 'sources', 'raw', `${id}.json`);
 
 export const sourceExists = async (
   vaultPath: string,

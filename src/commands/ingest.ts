@@ -17,7 +17,7 @@ import { runInstagramAuth } from './auth';
 
 export const runIngest = async (): Promise<void> => {
   const { vaultPath } = config;
-  const linksFile = join(vaultPath, 'Inbox', 'links.md');
+  const linksFile = join(vaultPath, '_inbox', 'links.md');
 
   await ensureVaultDirs(vaultPath);
 
@@ -131,5 +131,5 @@ export const runIngest = async (): Promise<void> => {
 };
 
 export const ingestCommand = new Command('ingest')
-  .description('Ingest video links from $VAULT_PATH/Inbox/links.md')
+  .description('Ingest video links from $VAULT_PATH/_inbox/links.md')
   .action(runIngest);

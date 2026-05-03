@@ -4,7 +4,7 @@ import { readConfig } from './system';
 
 const backupDir = (vaultPath: string, filePath: string): string => {
   const name = basename(filePath, extname(filePath));
-  return join(vaultPath, 'Backup', 'Docs', name);
+  return join(vaultPath, '.system', 'backup', 'docs', name);
 };
 
 const timestamp = (): string =>

@@ -15,7 +15,7 @@ type PlaywrightCookie = {
 };
 
 export const browserStatePath = (vaultPath: string) =>
-  join(vaultPath, 'System', 'browser-state');
+  join(vaultPath, '.system', 'browser-state');
 
 const toCookiesTxt = (cookies: PlaywrightCookie[]): string => {
   const lines = ['# Netscape HTTP Cookie File', ''];

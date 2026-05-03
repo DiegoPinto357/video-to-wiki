@@ -27,7 +27,7 @@ const listCommand = new Command('list')
     if (categories.length === 0 && tags.length === 0) {
       console.log(
         chalk.yellow(
-          'No tags defined yet. Edit vault/System/tags.json to add them.',
+          'No tags defined yet. Edit vault/.system/tags.json to add them.',
         ),
       );
       return;
@@ -51,7 +51,7 @@ const validateCommand = new Command('validate')
     const { vaultPath } = config;
     const { tags, categories } = await readTags(vaultPath);
     const defined = new Set([...tags, ...categories]);
-    const docsDir = join(vaultPath, 'Docs');
+    const docsDir = vaultPath;
 
     let files: string[];
     try {

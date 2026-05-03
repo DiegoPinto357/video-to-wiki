@@ -52,14 +52,17 @@ The vault directory will be created automatically on first run with the followin
 
 ```
 vault/
-├── Inbox/
+├── _inbox/
 │   └── links.md       ← Drop your URLs here
-├── Sources/
-│   └── raw/           ← Ingested JSON files land here
-└── System/
+├── *.md               ← Docs live at the vault root (visible in Obsidian)
+└── .system/           ← Hidden from Obsidian
+    ├── sources/
+    │   └── raw/       ← Ingested JSON files land here
     ├── sources.json   ← Ingestion tracking
     ├── tags.json      ← Tag definitions
-    └── config.json    ← App config
+    ├── config.json    ← App config
+    └── backup/
+        └── docs/      ← Versioned doc backups
 ```
 
 ### 3. Install Python dependencies
@@ -78,7 +81,7 @@ npx playwright install chromium
 
 ### Add links to your inbox
 
-Open `$VAULT_PATH/Inbox/links.md` in Obsidian (or any editor) and add URLs — one per line. Markdown formatting is fine; the tool picks up any line starting with `http`.
+Open `$VAULT_PATH/_inbox/links.md` in Obsidian (or any editor) and add URLs — one per line. Markdown formatting is fine; the tool picks up any line starting with `http`.
 
 ```md
 # Videos to process

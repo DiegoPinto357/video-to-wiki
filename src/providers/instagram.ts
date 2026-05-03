@@ -52,7 +52,7 @@ export class InstagramAuthError extends Error {
 }
 
 export const instagramCookiesPath = (vaultPath: string) =>
-  join(vaultPath, 'System', 'instagram-cookies.txt');
+  join(vaultPath, '.system', 'instagram-cookies.txt');
 
 export const fetchInstagram = async (
   id: string,

@@ -10,7 +10,7 @@ export const listRawCommand = new Command('list-raw')
   .description('List all ingested raw sources')
   .action(async () => {
     const { vaultPath } = config;
-    const rawDir = join(vaultPath, 'Sources', 'raw');
+    const rawDir = join(vaultPath, '.system', 'sources', 'raw');
 
     let files: string[];
     try {

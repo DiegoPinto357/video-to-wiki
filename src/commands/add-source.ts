@@ -12,7 +12,7 @@ export const addSourceCommand = new Command('add-source')
   .argument('<url>', 'Video URL to add')
   .action(async (url: string) => {
     const { vaultPath } = config;
-    const linksFile = join(vaultPath, 'Inbox', 'links.md');
+    const linksFile = join(vaultPath, '_inbox', 'links.md');
 
     let normalized: ReturnType<typeof normalizeUrl>;
     try {

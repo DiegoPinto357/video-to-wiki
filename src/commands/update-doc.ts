@@ -16,7 +16,7 @@ export const updateDocCommand = new Command('update-doc')
   .action(async (id?: string) => {
     const { vaultPath } = config;
     const sources = await readSources(vaultPath);
-    const rawDir = join(vaultPath, 'Sources', 'raw');
+    const rawDir = join(vaultPath, '.system', 'sources', 'raw');
 
     const toUpdate = id
       ? [id]

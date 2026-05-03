@@ -44,7 +44,7 @@ export const docPath = (
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 80);
-  return join(vaultPath, 'Docs', `${safe} [${id.slice(0, 8)}].md`);
+  return join(vaultPath, `${safe} [${id.slice(0, 8)}].md`);
 };
 
 export const writeDocCommand = new Command('write-doc')
@@ -53,7 +53,7 @@ export const writeDocCommand = new Command('write-doc')
   .action(async (id?: string) => {
     const { vaultPath } = config;
     const sources = await readSources(vaultPath);
-    const rawDir = join(vaultPath, 'Sources', 'raw');
+    const rawDir = join(vaultPath, '.system', 'sources', 'raw');
 
     const toProcess = id
       ? [id]
