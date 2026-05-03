@@ -5,6 +5,7 @@ import { ingestCommand, runIngest } from './commands/ingest';
 import { authCommand } from './commands/auth';
 import { listRawCommand } from './commands/list-raw';
 import { writeDocCommand } from './commands/write-doc';
+import { updateDocCommand } from './commands/update-doc';
 import { addSourceCommand } from './commands/add-source';
 import { tagsCommand } from './commands/tags';
 
@@ -19,6 +20,7 @@ program.addCommand(ingestCommand);
 program.addCommand(authCommand);
 program.addCommand(listRawCommand);
 program.addCommand(writeDocCommand);
+program.addCommand(updateDocCommand);
 program.addCommand(addSourceCommand);
 program.addCommand(tagsCommand);
 

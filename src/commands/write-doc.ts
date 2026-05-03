@@ -6,7 +6,7 @@ import { config } from '../config';
 import { readSources, markSourceProcessed } from '../utils/system';
 import type { SourceData } from '../types';
 
-const buildDoc = (data: SourceData): string => {
+export const buildDoc = (data: SourceData): string => {
   const date = new Date(data.createdAt).toISOString().split('T')[0];
   const frontmatter = [
     '---',
@@ -34,7 +34,11 @@ const buildDoc = (data: SourceData): string => {
   return `${frontmatter}\n\n${body}\n`;
 };
 
-const docPath = (vaultPath: string, title: string, id: string): string => {
+export const docPath = (
+  vaultPath: string,
+  title: string,
+  id: string,
+): string => {
   const safe = title
     .replace(/[/\\:*?"<>|]/g, '')
     .replace(/\s+/g, ' ')
