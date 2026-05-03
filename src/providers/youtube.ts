@@ -1,5 +1,6 @@
 import ytdl from '@distube/ytdl-core';
 import { YoutubeTranscript } from 'youtube-transcript';
+import { transcribeWithWhisper } from '../transcription/whisper';
 import type { SourceData } from '../types';
 
 export const fetchYouTube = async (
@@ -12,7 +13,14 @@ export const fetchYouTube = async (
   ]);
 
   const { title, description } = info.videoDetails;
-  const transcript = transcriptItems.map(t => t.text).join(' ');
+
+  let transcript: string;
+  if (transcriptItems.length > 0) {
+    transcript = transcriptItems.map(t => t.text).join(' ');
+  } else {
+    console.log('No captions found, falling back to Whisper transcription...');
+    transcript = await transcribeWithWhisper(url);
+  }
 
   return {
     id,
