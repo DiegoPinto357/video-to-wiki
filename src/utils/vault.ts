@@ -1,6 +1,7 @@
 import { mkdir, writeFile, access } from 'fs/promises';
 import { join } from 'path';
 import type { SourceData } from '../types';
+import { initSystemFiles } from './system';
 
 export const ensureVaultDirs = async (vaultPath: string): Promise<void> => {
   const dirs = [
@@ -11,6 +12,7 @@ export const ensureVaultDirs = async (vaultPath: string): Promise<void> => {
     join(vaultPath, 'Backup', 'Docs'),
   ];
   await Promise.all(dirs.map(d => mkdir(d, { recursive: true })));
+  await initSystemFiles(vaultPath);
 };
 
 export const getSourcePath = (vaultPath: string, id: string): string =>

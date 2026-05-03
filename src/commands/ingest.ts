@@ -6,6 +6,7 @@ import { config } from '../config';
 import { normalizeUrl } from '../utils/url';
 import { generateId } from '../utils/id';
 import { ensureVaultDirs, sourceExists, saveSource } from '../utils/vault';
+import { markSourceIngested } from '../utils/system';
 import { fetchYouTube } from '../providers/youtube';
 
 export const ingestCommand = new Command('ingest')
@@ -75,6 +76,7 @@ export const ingestCommand = new Command('ingest')
         }
 
         await saveSource(vaultPath, data);
+        await markSourceIngested(vaultPath, data.id);
         console.log(chalk.green(`✓ Saved: ${data.title}`));
         success++;
       } catch (err) {
