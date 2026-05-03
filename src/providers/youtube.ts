@@ -1,5 +1,6 @@
 import ytdl from '@distube/ytdl-core';
 import { YoutubeTranscript } from 'youtube-transcript';
+import chalk from 'chalk';
 import { transcribeWithWhisper } from '../transcription/whisper';
 import type { SourceData } from '../types';
 
@@ -7,6 +8,7 @@ export const fetchYouTube = async (
   id: string,
   url: string,
 ): Promise<SourceData> => {
+  console.log(chalk.gray('  → Fetching metadata & captions...'));
   const [info, transcriptItems] = await Promise.all([
     ytdl.getBasicInfo(url),
     YoutubeTranscript.fetchTranscript(url).catch(() => []),
@@ -18,7 +20,11 @@ export const fetchYouTube = async (
   if (transcriptItems.length > 0) {
     transcript = transcriptItems.map(t => t.text).join(' ');
   } else {
-    console.log('No captions found, falling back to Whisper transcription...');
+    console.log(
+      chalk.gray(
+        '  → No captions found, transcribing with Whisper (this may take a minute)...',
+      ),
+    );
     transcript = await transcribeWithWhisper(url);
   }
 

@@ -41,13 +41,18 @@ const runWhisper = (audioPath: string, modelSize: string): Promise<string> =>
     });
   });
 
+export const transcribeFile = async (
+  audioPath: string,
+  modelSize = 'small',
+): Promise<string> => runWhisper(audioPath, modelSize);
+
 export const transcribeWithWhisper = async (
   url: string,
   modelSize = 'small',
 ): Promise<string> => {
   const audioPath = await downloadAudio(url);
   try {
-    return await runWhisper(audioPath, modelSize);
+    return await transcribeFile(audioPath, modelSize);
   } finally {
     await unlink(audioPath).catch(() => {});
   }
