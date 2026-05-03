@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import './config';
 import { Command } from 'commander';
 import { ingestCommand } from './commands/ingest';
 

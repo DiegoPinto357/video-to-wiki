@@ -1,5 +1,8 @@
 node_modules/
 dist/
-*.js.map
 .env
+
+# Test vault — tracked for dev convenience, but contents are personal
+vault/
+
 .DS_Store
