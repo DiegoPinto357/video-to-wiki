@@ -5,14 +5,14 @@ import chalk from 'chalk';
 import { config } from '../config';
 import { normalizeUrl } from '../utils/url';
 import { generateId } from '../utils/id';
-import { sourceExists } from '../utils/vault';
+import { sourceExists } from '../utils/wiki';
 
 export const addSourceCommand = new Command('add-source')
   .description('Add a URL directly to the inbox links file')
   .argument('<url>', 'Video URL to add')
   .action(async (url: string) => {
-    const { vaultPath } = config;
-    const linksFile = join(vaultPath, '_inbox', 'links.md');
+    const { wikiPath } = config;
+    const linksFile = join(wikiPath, '_inbox', 'links.md');
 
     let normalized: ReturnType<typeof normalizeUrl>;
     try {
@@ -24,7 +24,7 @@ export const addSourceCommand = new Command('add-source')
 
     const id = generateId(normalized.url);
 
-    if (await sourceExists(vaultPath, id)) {
+    if (await sourceExists(wikiPath, id)) {
       console.log(chalk.yellow(`↷ Already ingested: ${normalized.url}`));
       return;
     }

@@ -21,8 +21,8 @@ const parseFrontmatterTags = (content: string): string[] => {
 const listCommand = new Command('list')
   .description('List all defined tags')
   .action(async () => {
-    const { vaultPath } = config;
-    const { categories, tags } = await readTags(vaultPath);
+    const { wikiPath } = config;
+    const { categories, tags } = await readTags(wikiPath);
 
     if (categories.length === 0 && tags.length === 0) {
       console.log(
@@ -48,10 +48,10 @@ const listCommand = new Command('list')
 const validateCommand = new Command('validate')
   .description('Check that all docs only use tags defined in tags.json')
   .action(async () => {
-    const { vaultPath } = config;
-    const { tags, categories } = await readTags(vaultPath);
+    const { wikiPath } = config;
+    const { tags, categories } = await readTags(wikiPath);
     const defined = new Set([...tags, ...categories]);
-    const docsDir = vaultPath;
+    const docsDir = wikiPath;
 
     let files: string[];
     try {
@@ -85,6 +85,6 @@ const validateCommand = new Command('validate')
   });
 
 export const tagsCommand = new Command('tags')
-  .description('Manage vault tags')
+  .description('Manage wiki tags')
   .addCommand(listCommand)
   .addCommand(validateCommand);

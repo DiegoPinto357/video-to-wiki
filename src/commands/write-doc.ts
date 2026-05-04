@@ -35,7 +35,7 @@ export const buildDoc = (data: SourceData): string => {
 };
 
 export const docPath = (
-  vaultPath: string,
+  wikiPath: string,
   title: string,
   id: string,
 ): string => {
@@ -44,16 +44,16 @@ export const docPath = (
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 80);
-  return join(vaultPath, `${safe} [${id.slice(0, 8)}].md`);
+  return join(wikiPath, `${safe} [${id.slice(0, 8)}].md`);
 };
 
 export const writeDocCommand = new Command('write-doc')
   .description('Create an Obsidian doc from a raw source')
   .argument('[id]', 'Source ID (omit to process all unprocessed sources)')
   .action(async (id?: string) => {
-    const { vaultPath } = config;
-    const sources = await readSources(vaultPath);
-    const rawDir = join(vaultPath, '.system', 'sources', 'raw');
+    const { wikiPath } = config;
+    const sources = await readSources(wikiPath);
+    const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 
     const toProcess = id
       ? [id]
@@ -77,7 +77,7 @@ export const writeDocCommand = new Command('write-doc')
       }
 
       const data = JSON.parse(await readFile(rawPath, 'utf-8')) as SourceData;
-      const outPath = docPath(vaultPath, data.title, sourceId);
+      const outPath = docPath(wikiPath, data.title, sourceId);
 
       try {
         await access(outPath);
@@ -88,7 +88,7 @@ export const writeDocCommand = new Command('write-doc')
       }
 
       await writeFile(outPath, buildDoc(data), 'utf-8');
-      await markSourceProcessed(vaultPath, sourceId, outPath);
+      await markSourceProcessed(wikiPath, sourceId, outPath);
       console.log(chalk.green(`✓ Written: ${outPath}`));
     }
   });

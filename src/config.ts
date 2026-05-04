@@ -2,14 +2,14 @@ import 'dotenv/config';
 import { resolve } from 'path';
 
 const getVaultPath = (): string => {
-  const vaultPath = process.env.VAULT_PATH;
-  if (!vaultPath) {
-    console.error('Error: VAULT_PATH is not set. Add it to your .env file.');
+  const wikiPath = process.env.WIKI_PATH;
+  if (!wikiPath) {
+    console.error('Error: WIKI_PATH is not set. Add it to your .env file.');
     process.exit(1);
   }
-  return resolve(vaultPath);
+  return resolve(wikiPath);
 };
 
 export const config = {
-  vaultPath: getVaultPath(),
+  wikiPath: getVaultPath(),
 };

@@ -1,10 +1,10 @@
 # video-to-wiki
 
-CLI tool that ingests YouTube and Instagram videos into an [Obsidian](https://obsidian.md)-compatible knowledge vault. Drop links into your inbox, run the tool, and get structured JSON sources with metadata and transcripts ready for AI processing.
+CLI tool that ingests YouTube and Instagram videos into an [Obsidian](https://obsidian.md)-compatible knowledge wiki. Drop links into your inbox, run the tool, and get structured JSON sources with metadata and transcripts ready for AI processing.
 
 ## How it works
 
-1. Add video URLs to `$VAULT_PATH/Inbox/links.md` (one per line)
+1. Add video URLs to `$WIKI_PATH/Inbox/links.md` (one per line)
 2. Run the CLI — it reads the links, fetches metadata + transcripts, and saves structured JSON to `Sources/raw/`
 3. Already-ingested URLs are skipped automatically (deduplication via SHA1 hash)
 4. Instagram links trigger an automatic browser auth flow if cookies aren't present yet
@@ -32,9 +32,9 @@ cd video-to-wiki
 npm install
 ```
 
-### 2. Configure your vault
+### 2. Configure your wiki
 
-Copy the example env file and set your vault path:
+Copy the example env file and set your wiki path:
 
 ```bash
 cp .env.example .env
@@ -43,15 +43,15 @@ cp .env.example .env
 Edit `.env`:
 
 ```env
-VAULT_PATH=/absolute/path/to/your/obsidian/vault
+WIKI_PATH=/absolute/path/to/your/obsidian/vault
 # Or relative to the repo root:
-# VAULT_PATH=./vault
+# WIKI_PATH=./vault
 ```
 
-The vault directory will be created automatically on first run with the following structure:
+The wiki directory will be created automatically on first run with the following structure:
 
 ```
-vault/
+wiki/
 ├── _inbox/
 │   └── links.md       ← Drop your URLs here
 ├── *.md               ← Docs live at the vault root (visible in Obsidian)
@@ -81,7 +81,7 @@ npx playwright install chromium
 
 ### Add links to your inbox
 
-Open `$VAULT_PATH/_inbox/links.md` in Obsidian (or any editor) and add URLs — one per line. Markdown formatting is fine; the tool picks up any line starting with `http`.
+Open `$WIKI_PATH/_inbox/links.md` in Obsidian (or any editor) and add URLs — one per line. Markdown formatting is fine; the tool picks up any line starting with `http`.
 
 ```md
 # Videos to process

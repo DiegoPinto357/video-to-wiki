@@ -2,19 +2,19 @@ import { copyFile, mkdir, readdir, rm, access } from 'fs/promises';
 import { join, basename, extname } from 'path';
 import { readConfig } from './system';
 
-const backupDir = (vaultPath: string, filePath: string): string => {
+const backupDir = (wikiPath: string, filePath: string): string => {
   const name = basename(filePath, extname(filePath));
-  return join(vaultPath, '.system', 'backup', 'docs', name);
+  return join(wikiPath, '.system', 'backup', 'docs', name);
 };
 
 const timestamp = (): string =>
   new Date().toISOString().replace(/:/g, '-').replace(/\..+/, '');
 
 export const backupFile = async (
-  vaultPath: string,
+  wikiPath: string,
   filePath: string,
 ): Promise<void> => {
-  const cfg = await readConfig(vaultPath);
+  const cfg = await readConfig(wikiPath);
   if (!cfg.backup.enabled) return;
 
   // Check file exists before trying to back it up
@@ -24,7 +24,7 @@ export const backupFile = async (
     return;
   }
 
-  const dir = backupDir(vaultPath, filePath);
+  const dir = backupDir(wikiPath, filePath);
   await mkdir(dir, { recursive: true });
 
   const ext = extname(filePath);

@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { config } from '../config';
 import { normalizeUrl } from '../utils/url';
 import { generateId } from '../utils/id';
-import { ensureVaultDirs, sourceExists, saveSource } from '../utils/vault';
+import { ensureWikiDirs, sourceExists, saveSource } from '../utils/wiki';
 import { markSourceIngested } from '../utils/system';
 import { fetchYouTube } from '../providers/youtube';
 import {
@@ -16,10 +16,10 @@ import {
 import { runInstagramAuth } from './auth';
 
 export const runIngest = async (): Promise<void> => {
-  const { vaultPath } = config;
-  const linksFile = join(vaultPath, '_inbox', 'links.md');
+  const { wikiPath } = config;
+  const linksFile = join(wikiPath, '_inbox', 'links.md');
 
-  await ensureVaultDirs(vaultPath);
+  await ensureWikiDirs(wikiPath);
 
   let raw: string;
   try {
@@ -49,14 +49,14 @@ export const runIngest = async (): Promise<void> => {
   });
 
   if (hasInstagram) {
-    const cookiesExist = await access(instagramCookiesPath(vaultPath))
+    const cookiesExist = await access(instagramCookiesPath(wikiPath))
       .then(() => true)
       .catch(() => false);
     if (!cookiesExist) {
       console.log(
         chalk.yellow('Instagram links detected — authentication required.\n'),
       );
-      await runInstagramAuth(vaultPath);
+      await runInstagramAuth(wikiPath);
     }
   }
 
@@ -81,7 +81,7 @@ export const runIngest = async (): Promise<void> => {
 
     const id = generateId(normalized.url);
 
-    if (await sourceExists(vaultPath, id)) {
+    if (await sourceExists(wikiPath, id)) {
       console.log(
         chalk.gray(`↷ Skipping (already ingested): ${normalized.url}`),
       );
@@ -98,14 +98,14 @@ export const runIngest = async (): Promise<void> => {
         data = await fetchYouTube(id, normalized.url);
       } else if (normalized.source === 'instagram') {
         try {
-          data = await fetchInstagram(id, normalized.url, vaultPath);
+          data = await fetchInstagram(id, normalized.url, wikiPath);
         } catch (err) {
           if (err instanceof InstagramAuthError) {
             console.log(
               chalk.yellow('\n  Session expired — re-authenticating...'),
             );
-            await runInstagramAuth(vaultPath);
-            data = await fetchInstagram(id, normalized.url, vaultPath);
+            await runInstagramAuth(wikiPath);
+            data = await fetchInstagram(id, normalized.url, wikiPath);
           } else {
             throw err;
           }
@@ -114,8 +114,8 @@ export const runIngest = async (): Promise<void> => {
         throw new Error(`Provider not yet implemented: ${normalized.source}`);
       }
 
-      await saveSource(vaultPath, data);
-      await markSourceIngested(vaultPath, data.id);
+      await saveSource(wikiPath, data);
+      await markSourceIngested(wikiPath, data.id);
       console.log(chalk.green(`✓ Saved: ${data.title}`));
       success++;
     } catch (err) {
@@ -131,5 +131,5 @@ export const runIngest = async (): Promise<void> => {
 };
 
 export const ingestCommand = new Command('ingest')
-  .description('Ingest video links from $VAULT_PATH/_inbox/links.md')
+  .description('Ingest video links from $WIKI_PATH/_inbox/links.md')
   .action(runIngest);

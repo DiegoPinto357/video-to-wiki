@@ -9,8 +9,8 @@ import type { SourceData } from '../types';
 export const listRawCommand = new Command('list-raw')
   .description('List all ingested raw sources')
   .action(async () => {
-    const { vaultPath } = config;
-    const rawDir = join(vaultPath, '.system', 'sources', 'raw');
+    const { wikiPath } = config;
+    const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 
     let files: string[];
     try {
@@ -25,7 +25,7 @@ export const listRawCommand = new Command('list-raw')
       return;
     }
 
-    const sources = await readSources(vaultPath);
+    const sources = await readSources(wikiPath);
 
     const rows = await Promise.all(
       files.map(async file => {

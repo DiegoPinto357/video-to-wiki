@@ -51,15 +51,15 @@ export class InstagramAuthError extends Error {
   }
 }
 
-export const instagramCookiesPath = (vaultPath: string) =>
-  join(vaultPath, '.system', 'instagram-cookies.txt');
+export const instagramCookiesPath = (wikiPath: string) =>
+  join(wikiPath, '.system', 'instagram-cookies.txt');
 
 export const fetchInstagram = async (
   id: string,
   url: string,
-  vaultPath: string,
+  wikiPath: string,
 ): Promise<SourceData> => {
-  const cookiesFile = instagramCookiesPath(vaultPath);
+  const cookiesFile = instagramCookiesPath(wikiPath);
 
   try {
     await access(cookiesFile);
@@ -74,7 +74,7 @@ export const fetchInstagram = async (
       if (err instanceof Error && err.message === 'SESSION_EXPIRED') {
         // Wipe stale session so auto-auth triggers on retry
         await rm(cookiesFile, { force: true });
-        await rm(join(vaultPath, 'System', 'browser-state'), {
+        await rm(join(wikiPath, 'System', 'browser-state'), {
           recursive: true,
           force: true,
         });

@@ -14,9 +14,9 @@ export const updateDocCommand = new Command('update-doc')
   )
   .argument('[id]', 'Source ID (omit to update all processed sources)')
   .action(async (id?: string) => {
-    const { vaultPath } = config;
-    const sources = await readSources(vaultPath);
-    const rawDir = join(vaultPath, '.system', 'sources', 'raw');
+    const { wikiPath } = config;
+    const sources = await readSources(wikiPath);
+    const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 
     const toUpdate = id
       ? [id]
@@ -40,11 +40,11 @@ export const updateDocCommand = new Command('update-doc')
       }
 
       const data = JSON.parse(await readFile(rawPath, 'utf-8')) as SourceData;
-      const outPath = docPath(vaultPath, data.title, sourceId);
+      const outPath = docPath(wikiPath, data.title, sourceId);
 
-      await backupFile(vaultPath, outPath);
+      await backupFile(wikiPath, outPath);
       await writeFile(outPath, buildDoc(data), 'utf-8');
-      await markSourceProcessed(vaultPath, sourceId, outPath);
+      await markSourceProcessed(wikiPath, sourceId, outPath);
       console.log(chalk.green(`✓ Updated: ${outPath}`));
     }
   });

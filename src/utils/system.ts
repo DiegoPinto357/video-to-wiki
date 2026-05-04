@@ -26,8 +26,8 @@ const DEFAULTS = {
   config: (): ConfigFile => ({ backup: { enabled: true, maxVersions: 10 } }),
 };
 
-const systemPath = (vaultPath: string, file: string) =>
-  join(vaultPath, '.system', file);
+const systemPath = (wikiPath: string, file: string) =>
+  join(wikiPath, '.system', file);
 
 const readJson = async <T>(path: string, fallback: () => T): Promise<T> => {
   try {
@@ -41,7 +41,7 @@ const readJson = async <T>(path: string, fallback: () => T): Promise<T> => {
 const writeJson = async (path: string, data: unknown): Promise<void> =>
   writeFile(path, JSON.stringify(data, null, 2), 'utf-8');
 
-export const initSystemFiles = async (vaultPath: string): Promise<void> => {
+export const initSystemFiles = async (wikiPath: string): Promise<void> => {
   const files: Array<[string, () => unknown]> = [
     ['tags.json', DEFAULTS.tags],
     ['sources.json', DEFAULTS.sources],
@@ -50,7 +50,7 @@ export const initSystemFiles = async (vaultPath: string): Promise<void> => {
 
   await Promise.all(
     files.map(async ([file, defaultFn]) => {
-      const path = systemPath(vaultPath, file);
+      const path = systemPath(wikiPath, file);
       try {
         await access(path);
       } catch {
@@ -60,21 +60,21 @@ export const initSystemFiles = async (vaultPath: string): Promise<void> => {
   );
 };
 
-export const readConfig = (vaultPath: string): Promise<ConfigFile> =>
-  readJson(systemPath(vaultPath, 'config.json'), DEFAULTS.config);
+export const readConfig = (wikiPath: string): Promise<ConfigFile> =>
+  readJson(systemPath(wikiPath, 'config.json'), DEFAULTS.config);
 
-export const readTags = (vaultPath: string): Promise<TagsFile> =>
-  readJson(systemPath(vaultPath, 'tags.json'), DEFAULTS.tags);
+export const readTags = (wikiPath: string): Promise<TagsFile> =>
+  readJson(systemPath(wikiPath, 'tags.json'), DEFAULTS.tags);
 
-export const readSources = (vaultPath: string): Promise<SourcesFile> =>
-  readJson(systemPath(vaultPath, 'sources.json'), DEFAULTS.sources);
+export const readSources = (wikiPath: string): Promise<SourcesFile> =>
+  readJson(systemPath(wikiPath, 'sources.json'), DEFAULTS.sources);
 
 export const markSourceIngested = async (
-  vaultPath: string,
+  wikiPath: string,
   id: string,
 ): Promise<void> => {
-  const path = systemPath(vaultPath, 'sources.json');
-  const sources = await readSources(vaultPath);
+  const path = systemPath(wikiPath, 'sources.json');
+  const sources = await readSources(wikiPath);
   if (!sources[id]) {
     sources[id] = { processed: false };
     await writeJson(path, sources);
@@ -82,12 +82,12 @@ export const markSourceIngested = async (
 };
 
 export const markSourceProcessed = async (
-  vaultPath: string,
+  wikiPath: string,
   id: string,
   docPath: string,
 ): Promise<void> => {
-  const path = systemPath(vaultPath, 'sources.json');
-  const sources = await readSources(vaultPath);
+  const path = systemPath(wikiPath, 'sources.json');
+  const sources = await readSources(wikiPath);
   sources[id] = { processed: true, docPath };
   await writeJson(path, sources);
 };
