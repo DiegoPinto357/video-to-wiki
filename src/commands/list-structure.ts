@@ -1,11 +1,17 @@
 import { Command } from 'commander';
 import { readdir } from 'fs/promises';
-import chalk from 'chalk';
+import { join } from 'path';
 import { config } from '../config';
 import { readTags, readSources } from '../utils/system';
+import { extractSummary } from '../utils/doc-summary';
 
 type WikiStructure = {
-  docs: Array<{ title: string; path: string; processed: boolean }>;
+  docs: Array<{
+    title: string;
+    path: string;
+    processed: boolean;
+    summary: string;
+  }>;
   tags: string[];
   categories: string[];
 };
@@ -29,18 +35,22 @@ export const listStructureCommand = new Command('list-structure')
       Object.entries(sources).map(([id, entry]) => [entry.docPath ?? '', id]),
     );
 
-    const docs = docFiles.map(file => {
-      const fullPath = `${wikiPath}/${file}`;
-      const id = pathToId[fullPath];
-      const title = file
-        .replace(/\s\[[a-f0-9]+\]\.md$/, '')
-        .replace(/\.md$/, '');
-      return {
-        title,
-        path: file,
-        processed: id ? (sources[id]?.processed ?? false) : false,
-      };
-    });
+    const docs = await Promise.all(
+      docFiles.map(async file => {
+        const fullPath = join(wikiPath, file);
+        const id = pathToId[fullPath];
+        const title = file
+          .replace(/\s\[[a-f0-9]+\]\.md$/, '')
+          .replace(/\.md$/, '');
+        const summary = await extractSummary(fullPath);
+        return {
+          title,
+          path: file,
+          processed: id ? (sources[id]?.processed ?? false) : false,
+          summary,
+        };
+      }),
+    );
 
     const structure: WikiStructure = { docs, tags, categories };
 
