@@ -37,7 +37,6 @@ export const listRawCommand = new Command('list-raw')
           id,
           data,
           processed: entry?.processed ?? false,
-          docPath: entry?.docPath,
         };
       }),
     );
@@ -46,12 +45,12 @@ export const listRawCommand = new Command('list-raw')
 
     console.log(chalk.bold(`\n${rows.length} source(s) ingested:\n`));
 
-    for (const { id, data, processed, docPath } of rows) {
+    for (const { id, data, processed } of rows) {
       const sourceLabel =
         data.source === 'youtube' ? chalk.red('YT') : chalk.magenta('IG');
       const date = new Date(data.createdAt).toLocaleDateString();
       const status = processed
-        ? chalk.green(`✓ ${docPath ?? 'processed'}`)
+        ? chalk.green('✓ processed')
         : chalk.gray('○ not processed');
 
       console.log(`  ${sourceLabel} ${chalk.white(data.title)}`);

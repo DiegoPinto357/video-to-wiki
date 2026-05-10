@@ -8,7 +8,6 @@ export type TagsFile = {
 
 export type SourceEntry = {
   processed: boolean;
-  docPath?: string;
 };
 
 export type SourcesFile = Record<string, SourceEntry>;
@@ -118,10 +117,9 @@ export const markSourceIngested = async (
 export const markSourceProcessed = async (
   wikiPath: string,
   id: string,
-  docPath: string,
 ): Promise<void> => {
   const path = systemPath(wikiPath, 'sources.json');
   const sources = await readSources(wikiPath);
-  sources[id] = { processed: true, docPath };
+  sources[id] = { processed: true };
   await writeJson(path, sources);
 };

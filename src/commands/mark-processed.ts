@@ -16,8 +16,7 @@ export const markProcessedCommand = new Command('mark-processed')
     }
 
     // Idempotent: if already processed, return success
-    const existing = sources[id];
-    await markSourceProcessed(wikiPath, id, existing.docPath ?? '');
+    await markSourceProcessed(wikiPath, id);
 
     console.log(JSON.stringify({ status: 'success' }));
   });
