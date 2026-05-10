@@ -3,7 +3,7 @@ import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
 import { config } from '../config';
-import { readTags } from '../utils/system';
+import { readTags, addTag, removeTag } from '../utils/system';
 
 type Frontmatter = { tags?: string[] };
 
@@ -84,7 +84,31 @@ const validateCommand = new Command('validate')
     }
   });
 
+const addCommand = new Command('add')
+  .description('Add a tag or category to tags.json')
+  .argument('<tag>', 'Tag name to add')
+  .option('--category', 'Add as a category instead of a tag')
+  .action(async (tag: string, opts: { category?: boolean }) => {
+    const { wikiPath } = config;
+    const type = opts.category ? 'category' : 'tag';
+    await addTag(wikiPath, tag, type);
+    console.log(JSON.stringify({ status: 'success', type, tag }));
+  });
+
+const removeCommand = new Command('remove')
+  .description('Remove a tag or category from tags.json')
+  .argument('<tag>', 'Tag name to remove')
+  .option('--category', 'Remove from categories instead of tags')
+  .action(async (tag: string, opts: { category?: boolean }) => {
+    const { wikiPath } = config;
+    const type = opts.category ? 'category' : 'tag';
+    await removeTag(wikiPath, tag, type);
+    console.log(JSON.stringify({ status: 'success', type, tag }));
+  });
+
 export const tagsCommand = new Command('tags')
   .description('Manage wiki tags')
   .addCommand(listCommand)
-  .addCommand(validateCommand);
+  .addCommand(validateCommand)
+  .addCommand(addCommand)
+  .addCommand(removeCommand);

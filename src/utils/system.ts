@@ -66,6 +66,35 @@ export const readConfig = (wikiPath: string): Promise<ConfigFile> =>
 export const readTags = (wikiPath: string): Promise<TagsFile> =>
   readJson(systemPath(wikiPath, 'tags.json'), DEFAULTS.tags);
 
+export const addTag = async (
+  wikiPath: string,
+  tag: string,
+  type: 'tag' | 'category' = 'tag',
+): Promise<void> => {
+  const path = systemPath(wikiPath, 'tags.json');
+  const data = await readTags(wikiPath);
+  const list = type === 'category' ? data.categories : data.tags;
+  if (!list.includes(tag)) {
+    list.push(tag);
+    await writeJson(path, data);
+  }
+};
+
+export const removeTag = async (
+  wikiPath: string,
+  tag: string,
+  type: 'tag' | 'category' = 'tag',
+): Promise<void> => {
+  const path = systemPath(wikiPath, 'tags.json');
+  const data = await readTags(wikiPath);
+  if (type === 'category') {
+    data.categories = data.categories.filter(t => t !== tag);
+  } else {
+    data.tags = data.tags.filter(t => t !== tag);
+  }
+  await writeJson(path, data);
+};
+
 export const readSources = (wikiPath: string): Promise<SourcesFile> =>
   readJson(systemPath(wikiPath, 'sources.json'), DEFAULTS.sources);
 
