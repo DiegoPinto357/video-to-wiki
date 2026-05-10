@@ -56,6 +56,14 @@ export const aiContextCommand = new Command('ai-context')
     );
 
     console.log(
-      JSON.stringify({ raw, structure: { docs, tags, categories } }, null, 2),
+      JSON.stringify(
+        {
+          raw,
+          structure: { docs, tags, categories },
+          ...(config.wikiContext ? { wikiContext: config.wikiContext } : {}),
+        },
+        null,
+        2,
+      ),
     );
   });

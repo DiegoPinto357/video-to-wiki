@@ -12,4 +12,5 @@ const getVaultPath = (): string => {
 
 export const config = {
   wikiPath: getVaultPath(),
+  wikiContext: process.env.WIKI_CONTEXT ?? null,
 };

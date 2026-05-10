@@ -48,19 +48,19 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 
 5. Identify candidate documents that may be related to the new content.
    - Call: npm run dev -- get-doc <file> for each candidate.
-   - Compare content to avoid duplication and find the best merge target.
+   - Use the existing doc content ONLY as reference for structure and to avoid duplication.
+   - The new content to be written comes EXCLUSIVELY from the current source (`ai-context` output). Do NOT copy or migrate content from existing documents into the new one.
 
-6. Think about structure and tags:
-   - Check the available tags and categories from the ai-context structure output.
-   - If no relevant tags or categories exist for this content, you MUST use the `ask` action to propose them to the user BEFORE creating or updating any document. Wait for user approval.
-   - Once the user approves a tag or category, add it with: npm run dev -- tags add <tag>
-   - For folder structures: you MUST use the `suggest` action and wait for user approval. NEVER include a folder path in the document target.
+6. Think about folder structure (REQUIRED):
+   - Review the existing docs list from ai-context. Is there a natural folder for this content?
+   - If a relevant subfolder doesn't exist yet but would help organize 2+ related docs, use the `suggest` action to propose it. Wait for user approval before placing the doc there.
+   - If the user approves a folder, write the doc with the subfolder in the target (e.g. `Sono/Doc.md`).
 
-7. Decide ONE action:
-   - update an existing document (preferred when related content exists)
-   - create a new document (only if no related document exists)
-   - suggest a folder structure — use the suggest action, await user approval, THEN write the doc in the approved subfolder
-   - ask the user if there is genuine ambiguity about tags, naming, or classification
+7. Think about tags and categories (REQUIRED):
+   - Check `wikiContext` (if present) — do NOT suggest tags that merely restate the wiki's overall scope.
+   - Check existing tags/categories from the structure output.
+   - If no relevant tags exist, use the `ask` action to propose new ones BEFORE writing the document. Wait for user approval.
+   - Once approved, add each tag: npm run dev -- tags add <tag>
 
 8. Pipe the JSON decision directly to apply:
 
@@ -75,11 +75,11 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - status "error" → STOP, report the error to the user, do NOT mark processed
    - action "ask" → STOP, present the question to the user, do NOT mark processed, await answer
    - action "suggest" → report the suggestion to the user, then proceed
-   - action "create" or "update" with status "success" → proceed to step 9
+   - action "create" or "update" with status "success" → proceed to step 10
 
 9. Call: npm run dev -- mark-processed <id>
 
-10. Report what was done to the user, then ask if they want to process another item.
+10. Report a summary of what was done (document created/updated, tags added, folder structure) and STOP. The user will re-invoke the skill to process the next item.
 
 ---
 
