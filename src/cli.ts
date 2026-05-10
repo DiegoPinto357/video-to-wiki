@@ -15,6 +15,7 @@ import { tagsCommand } from './commands/tags';
 import { applyCommand } from './commands/apply';
 import { markProcessedCommand } from './commands/mark-processed';
 import { aiContextCommand } from './commands/ai-context';
+import { cleanupCommand } from './commands/cleanup';
 
 const program = new Command();
 
@@ -37,6 +38,7 @@ program.addCommand(tagsCommand);
 program.addCommand(applyCommand);
 program.addCommand(markProcessedCommand);
 program.addCommand(aiContextCommand);
+program.addCommand(cleanupCommand);
 
 program.action(runIngest);
 
