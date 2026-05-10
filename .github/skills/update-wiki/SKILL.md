@@ -25,7 +25,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 - npm run dev -- list-unprocessed
 - npm run dev -- ai-context <id>
 - npm run dev -- get-doc <file>
-- npm run dev -- apply - --json
+- npm run dev -- apply <file> --json
 - npm run dev -- mark-processed <id>
 - npm run dev -- tags add <tag>
 - npm run dev -- tags add <tag> --category
@@ -62,9 +62,14 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - If no relevant tags exist, use the `ask` action to propose new ones BEFORE writing the document. Wait for user approval.
    - Once approved, add all tags in a single call: npm run dev -- tags add <tag1> <tag2> ...
 
-8. Pipe the JSON decision directly to apply:
+8. Write the JSON to a temp file and pass it to apply:
 
-   echo '<json>' | npm run dev -- apply - --json
+   cat > /tmp/wiki-apply.json << 'ENDJSON'
+   { ...json... }
+   ENDJSON
+   npm run dev -- apply /tmp/wiki-apply.json --json
+
+   Use a heredoc with a quoted delimiter (`'ENDJSON'`) so all content is treated literally — no issues with single quotes, apostrophes, `$`, or any special characters in the document text. NEVER use `echo '<json>'` as it will hang on Portuguese text with apostrophes.
 
    The `content` field MUST:
    - Follow the document template exactly (see template.md)
