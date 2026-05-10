@@ -85,14 +85,14 @@ const validateCommand = new Command('validate')
   });
 
 const addCommand = new Command('add')
-  .description('Add a tag or category to tags.json')
-  .argument('<tag>', 'Tag name to add')
-  .option('--category', 'Add as a category instead of a tag')
-  .action(async (tag: string, opts: { category?: boolean }) => {
+  .description('Add one or more tags or categories to tags.json')
+  .argument('<tags...>', 'Tag name(s) to add')
+  .option('--category', 'Add as categories instead of tags')
+  .action(async (tags: string[], opts: { category?: boolean }) => {
     const { wikiPath } = config;
     const type = opts.category ? 'category' : 'tag';
-    await addTag(wikiPath, tag, type);
-    console.log(JSON.stringify({ status: 'success', type, tag }));
+    await addTag(wikiPath, tags, type);
+    console.log(JSON.stringify({ status: 'success', type, tags }));
   });
 
 const removeCommand = new Command('remove')

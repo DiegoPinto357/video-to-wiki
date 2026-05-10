@@ -60,7 +60,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - Check `wikiContext` (if present) — do NOT suggest tags that merely restate the wiki's overall scope.
    - Check existing tags/categories from the structure output.
    - If no relevant tags exist, use the `ask` action to propose new ones BEFORE writing the document. Wait for user approval.
-   - Once approved, add each tag: npm run dev -- tags add <tag>
+   - Once approved, add all tags in a single call: npm run dev -- tags add <tag1> <tag2> ...
 
 8. Pipe the JSON decision directly to apply:
 

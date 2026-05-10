@@ -68,16 +68,21 @@ export const readTags = (wikiPath: string): Promise<TagsFile> =>
 
 export const addTag = async (
   wikiPath: string,
-  tag: string,
+  tags: string | string[],
   type: 'tag' | 'category' = 'tag',
 ): Promise<void> => {
   const path = systemPath(wikiPath, 'tags.json');
   const data = await readTags(wikiPath);
   const list = type === 'category' ? data.categories : data.tags;
-  if (!list.includes(tag)) {
-    list.push(tag);
-    await writeJson(path, data);
+  const toAdd = Array.isArray(tags) ? tags : [tags];
+  let changed = false;
+  for (const tag of toAdd) {
+    if (!list.includes(tag)) {
+      list.push(tag);
+      changed = true;
+    }
   }
+  if (changed) await writeJson(path, data);
 };
 
 export const removeTag = async (
