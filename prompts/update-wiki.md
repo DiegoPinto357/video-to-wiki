@@ -5,39 +5,50 @@ All content MUST be written in Brazilian Portuguese (pt-BR).
 You must use the available CLI commands to retrieve and manipulate data.
 Do NOT read files directly unless explicitly instructed.
 
+All commands are run from the app directory using:
+
+  npm run dev -- <command>
+
+Configuration (wiki path, etc.) is loaded automatically. No setup required.
+
 ---
 
 ## AVAILABLE COMMANDS
 
-- app list-unprocessed
-- app get-raw <id>
-- app list-structure
-- app get-doc <file>
-- app apply <file.json>
+- npm run dev -- list-unprocessed
+- npm run dev -- get-raw <id>
+- npm run dev -- list-structure
+- npm run dev -- get-doc <file>
+- npm run dev -- apply <file.json> --json
+- npm run dev -- mark-processed <id>
 
 ---
 
 ## WORKFLOW
 
-1. Call: app list-unprocessed
+1. Call: npm run dev -- list-unprocessed
 
 2. Select ONE item to process
 
-3. Call: app get-raw <id>
+3. Call: npm run dev -- get-raw <id>
 
-4. Call: app list-structure
+4. Call: npm run dev -- list-structure
 
-5. Decide ONE action:
-   - update an existing document
-   - create a new document
+5. Identify candidate documents that may be related to the new content
+   - Call: npm run dev -- get-doc <file> for each candidate
+   - Compare content to avoid duplication and find the best merge target
+
+6. Decide ONE action:
+   - update an existing document (preferred when related content exists)
+   - create a new document (only if no related document exists)
    - suggest a structural change
-
-6. If updating:
-   - Call: app get-doc <target>
+   - ask the user if there is ambiguity
 
 7. Generate a JSON decision file
 
-8. Call: app apply <file.json>
+8. Call: npm run dev -- apply <file.json> --json
+
+9. Call: npm run dev -- mark-processed <id>
 
 ---
 
