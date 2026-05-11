@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { readFile, writeFile, access } from 'fs/promises';
 import { join, isAbsolute } from 'path';
 import chalk from 'chalk';
+import { jsonrepair } from 'jsonrepair';
 import { config } from '../config';
 import { backupFile } from '../utils/backup';
 
@@ -30,9 +31,10 @@ type AiOutput = AiWrite | AiSuggestion | AiAsk;
 
 type ApplyResult = {
   status: 'success' | 'error';
-  action: AiAction;
+  action: AiAction | null;
   file?: string;
   question?: string;
+  message?: string;
 };
 
 const deduplicateSources = (
@@ -54,6 +56,38 @@ const applyWrite = async (
   payload: AiWrite,
   jsonOutput: boolean,
 ): Promise<void> => {
+  if (!payload.target) {
+    const msg = 'Missing required field: "target"';
+    if (jsonOutput) {
+      console.log(
+        JSON.stringify({
+          status: 'error',
+          action: payload.action,
+          message: msg,
+        }),
+      );
+    } else {
+      console.error(chalk.red(msg));
+    }
+    process.exit(1);
+  }
+
+  if (!payload.content) {
+    const msg = 'Missing required field: "content"';
+    if (jsonOutput) {
+      console.log(
+        JSON.stringify({
+          status: 'error',
+          action: payload.action,
+          message: msg,
+        }),
+      );
+    } else {
+      console.error(chalk.red(msg));
+    }
+    process.exit(1);
+  }
+
   const targetPath = resolveTarget(wikiPath, payload.target);
 
   const exists = await access(targetPath)
@@ -75,7 +109,24 @@ const applyWrite = async (
   const sources = payload.sources ? deduplicateSources(payload.sources) : [];
   const finalPayload = { ...payload, sources };
 
-  await writeFile(targetPath, finalPayload.content, 'utf-8');
+  try {
+    await writeFile(targetPath, finalPayload.content, 'utf-8');
+  } catch (err) {
+    const msg = `Failed to write file "${payload.target}": ${err instanceof Error ? err.message : String(err)}`;
+    if (jsonOutput) {
+      console.log(
+        JSON.stringify({
+          status: 'error',
+          action: payload.action,
+          file: payload.target,
+          message: msg,
+        }),
+      );
+    } else {
+      console.error(chalk.red(msg));
+    }
+    process.exit(1);
+  }
 
   if (jsonOutput) {
     const result: ApplyResult = {
@@ -146,11 +197,19 @@ export const applyCommand = new Command('apply')
     } else {
       try {
         raw = await readFile(file, 'utf-8');
-      } catch {
+      } catch (err) {
+        const msg = `Cannot read file "${file}": ${err instanceof Error ? err.message : String(err)}`;
         if (jsonOutput) {
-          console.log(JSON.stringify({ status: 'error', action: null, file }));
+          console.log(
+            JSON.stringify({
+              status: 'error',
+              action: null,
+              file,
+              message: msg,
+            }),
+          );
         } else {
-          console.error(chalk.red(`Cannot read file: ${file}`));
+          console.error(chalk.red(msg));
         }
         process.exit(1);
       }
@@ -158,12 +217,16 @@ export const applyCommand = new Command('apply')
 
     let payload: AiOutput;
     try {
-      payload = JSON.parse(raw) as AiOutput;
-    } catch {
+      const repaired = jsonrepair(raw);
+      payload = JSON.parse(repaired) as AiOutput;
+    } catch (err) {
+      const msg = `Invalid JSON: ${err instanceof Error ? err.message : String(err)}`;
       if (jsonOutput) {
-        console.log(JSON.stringify({ status: 'error', action: null }));
+        console.log(
+          JSON.stringify({ status: 'error', action: null, message: msg }),
+        );
       } else {
-        console.error(chalk.red('Invalid JSON in AI output file.'));
+        console.error(chalk.red(msg));
       }
       process.exit(1);
     }
@@ -172,7 +235,11 @@ export const applyCommand = new Command('apply')
       const msg = `Unknown action: "${payload.action}". Expected create, update, suggest, or ask.`;
       if (jsonOutput) {
         console.log(
-          JSON.stringify({ status: 'error', action: payload.action }),
+          JSON.stringify({
+            status: 'error',
+            action: payload.action,
+            message: msg,
+          }),
         );
       } else {
         console.error(chalk.red(msg));

@@ -78,6 +78,8 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 
    Use a heredoc with a quoted delimiter (`'ENDJSON'`) so all content is treated literally — no issues with single quotes, apostrophes, `$`, or any special characters in the document text. NEVER use `echo '<json>'` as it will hang on Portuguese text with apostrophes.
 
+   IMPORTANT — valid JSON inside the heredoc: the `content` value is a JSON string, so any literal double-quote character (`"`) inside it MUST be escaped as `\"`. Use single quotes (`'...'`) or em-dashes instead of double quotes in prose whenever possible to avoid this.
+
    The `content` field MUST:
    - Follow the document template exactly (see template.md)
    - Include approved tags on the first line as Obsidian inline tags: `#tag1 #tag2 #tag3`
