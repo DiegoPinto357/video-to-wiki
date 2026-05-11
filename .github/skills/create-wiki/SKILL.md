@@ -56,14 +56,14 @@ npm run dev -- <command>
 5. Initialize the wiki system files with all config in one command. For values containing special characters, write them to temp files first:
 
    ```
-   cat > /tmp/wiki-wikicontext.txt << 'EOF'
+   cat > tmp/wiki-wikicontext.txt << 'EOF'
    <wikiContext>
    EOF
 
    npm run dev -- wiki init "<name>" \
      --description "<description>" \
      --language "<language>" \
-     --wiki-context "$(cat /tmp/wiki-wikicontext.txt)"
+     --wiki-context "$(cat tmp/wiki-wikicontext.txt)"
    ```
 
    This sets name, description, language, and wikiContext in a single write — avoiding race conditions on synced folders (Google Drive, iCloud, etc.).

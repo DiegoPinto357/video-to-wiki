@@ -5,3 +5,4 @@ dist/
 wiki/
 
 .DS_Store
+tmp/

@@ -76,10 +76,10 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 
 9. Execute each approved action in sequence using a temp file:
 
-   cat > /tmp/wiki-apply.json << 'ENDJSON'
+   cat > tmp/wiki-apply.json << 'ENDJSON'
    { ...json... }
    ENDJSON
-   npm run dev -- apply /tmp/wiki-apply.json --json
+   npm run dev -- apply tmp/wiki-apply.json --json
 
    Use a heredoc with a quoted delimiter (`'ENDJSON'`) so all content is treated literally — no issues with single quotes, apostrophes, `$`, or any special characters in the document text. NEVER use `echo '<json>'` as it will hang on Portuguese text with apostrophes.
 
