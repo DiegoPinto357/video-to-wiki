@@ -10,8 +10,9 @@ import { sourceExists } from '../utils/wiki';
 export const addSourceCommand = new Command('add-source')
   .description('Add a URL directly to the inbox links file')
   .argument('<url>', 'Video URL to add')
-  .action(async (url: string) => {
-    const { wikiPath } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (url: string, opts: { wiki?: string }) => {
+    const { wikiPath } = await resolveWikiConfig(opts.wiki);
     const linksFile = join(wikiPath, '_inbox', 'links.md');
 
     let normalized: ReturnType<typeof normalizeUrl>;

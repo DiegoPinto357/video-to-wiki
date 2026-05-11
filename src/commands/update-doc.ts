@@ -13,8 +13,9 @@ export const updateDocCommand = new Command('update-doc')
     'Regenerate a doc from its raw source (backs up the existing file first)',
   )
   .argument('[id]', 'Source ID (omit to update all processed sources)')
-  .action(async (id?: string) => {
-    const { wikiPath } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (id?: string, opts: { wiki?: string } = {}) => {
+    const { wikiPath } = await resolveWikiConfig(opts.wiki);
     const sources = await readSources(wikiPath);
     const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 

@@ -28,8 +28,9 @@ const stripFrontmatter = (content: string): string => {
 export const getDocCommand = new Command('get-doc')
   .description('Return full content and metadata for a wiki document')
   .argument('<file>', 'Document filename (e.g. "My Doc.md")')
-  .action(async (file: string) => {
-    const { wikiPath } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (file: string, opts: { wiki?: string }) => {
+    const { wikiPath } = await resolveWikiConfig(opts.wiki);
     const filePath = join(wikiPath, file);
 
     try {

@@ -8,8 +8,9 @@ import type { SourceData } from '../types';
 
 export const listRawCommand = new Command('list-raw')
   .description('List all ingested raw sources')
-  .action(async () => {
-    const { wikiPath } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (opts: { wiki?: string }) => {
+    const { wikiPath } = await resolveWikiConfig(opts.wiki);
     const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 
     let files: string[];

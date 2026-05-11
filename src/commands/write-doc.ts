@@ -50,8 +50,9 @@ export const docPath = (
 export const writeDocCommand = new Command('write-doc')
   .description('Create an Obsidian doc from a raw source')
   .argument('[id]', 'Source ID (omit to process all unprocessed sources)')
-  .action(async (id?: string) => {
-    const { wikiPath } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (id?: string, opts: { wiki?: string } = {}) => {
+    const { wikiPath } = await resolveWikiConfig(opts.wiki);
     const sources = await readSources(wikiPath);
     const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 

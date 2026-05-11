@@ -8,8 +8,9 @@ import type { SourceData } from '../types';
 export const getRawCommand = new Command('get-raw')
   .description('Return full raw content for a source by ID')
   .argument('<id>', 'Source ID')
-  .action(async (id: string) => {
-    const { wikiPath } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (id: string, opts: { wiki?: string }) => {
+    const { wikiPath } = await resolveWikiConfig(opts.wiki);
     const filePath = join(wikiPath, '.system', 'sources', 'raw', `${id}.json`);
 
     let data: SourceData;

@@ -218,8 +218,9 @@ export const applyCommand = new Command('apply')
     'Path to the AI output JSON file (or - to read from stdin)',
   )
   .option('--json', 'Output result as JSON')
-  .action(async (file: string, opts: { json?: boolean }) => {
-    const { wikiPath } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (file: string, opts: { json?: boolean; wiki?: string }) => {
+    const { wikiPath } = await resolveWikiConfig(opts.wiki);
     const jsonOutput = !!opts.json;
 
     let raw: string;

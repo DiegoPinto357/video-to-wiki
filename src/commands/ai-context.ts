@@ -12,8 +12,9 @@ export const aiContextCommand = new Command('ai-context')
     'Return raw source + wiki structure in one call (token-efficient)',
   )
   .argument('<id>', 'Source ID')
-  .action(async (id: string) => {
-    const { wikiPath, wikiContext } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (id: string, opts: { wiki?: string }) => {
+    const { wikiPath, wikiContext } = await resolveWikiConfig(opts.wiki);
 
     // Get raw source
     const rawPath = join(wikiPath, '.system', 'sources', 'raw', `${id}.json`);

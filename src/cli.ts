@@ -22,11 +22,7 @@ const program = new Command();
 program
   .name('app')
   .description('Video Knowledge Ingestion CLI')
-  .version('1.0.0')
-  .option(
-    '--wiki <name>',
-    'Wiki to operate on (overrides active wiki in registry)',
-  );
+  .version('1.0.0');
 
 program.addCommand(ingestCommand);
 program.addCommand(authCommand);
@@ -45,6 +41,9 @@ program.addCommand(aiContextCommand);
 program.addCommand(cleanupCommand);
 program.addCommand(wikiCommand);
 
-program.action(runIngest);
+program.action(() => {
+  const opts = program.opts<{ wiki?: string }>();
+  runIngest(opts.wiki);
+});
 
 program.parseAsync(process.argv);

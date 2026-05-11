@@ -19,14 +19,14 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 
 ## AVAILABLE COMMANDS
 
-- npm run dev -- ingest
-- npm run dev -- list-unprocessed
-- npm run dev -- ai-context <id>
-- npm run dev -- get-doc <file>
-- npm run dev -- apply <file> --json
-- npm run dev -- mark-processed <id>
-- npm run dev -- tags add <tag>
-- npm run dev -- tags add <tag> --category
+- npm run dev -- ingest [--wiki <name>]
+- npm run dev -- list-unprocessed [--wiki <name>]
+- npm run dev -- ai-context <id> [--wiki <name>]
+- npm run dev -- get-doc <file> [--wiki <name>]
+- npm run dev -- apply <file> --json [--wiki <name>]
+- npm run dev -- mark-processed <id> [--wiki <name>]
+- npm run dev -- tags add <tag> [--wiki <name>]
+- npm run dev -- tags add <tag> --category [--wiki <name>]
 
 ---
 
@@ -79,7 +79,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    cat > tmp/wiki-apply.json << 'ENDJSON'
    { ...json... }
    ENDJSON
-   npm run dev -- apply tmp/wiki-apply.json --json
+   npm run dev -- apply tmp/wiki-apply.json --json [--wiki <name>]
 
    Use a heredoc with a quoted delimiter (`'ENDJSON'`) so all content is treated literally — no issues with single quotes, apostrophes, `$`, or any special characters in the document text. NEVER use `echo '<json>'` as it will hang on Portuguese text with apostrophes.
 

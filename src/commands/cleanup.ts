@@ -12,8 +12,9 @@ export const cleanupCommand = new Command('cleanup')
     'Clean up ingested inbox links and raw files for processed sources',
   )
   .option('--dry-run', 'Show what would be removed without making changes')
-  .action(async (opts: { dryRun?: boolean }) => {
-    const { wikiPath } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (opts: { dryRun?: boolean; wiki?: string }) => {
+    const { wikiPath } = await resolveWikiConfig(opts.wiki);
     const dryRun = !!opts.dryRun;
 
     if (dryRun) {

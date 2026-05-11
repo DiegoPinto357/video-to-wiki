@@ -18,8 +18,9 @@ type WikiStructure = {
 export const listStructureCommand = new Command('list-structure')
   .description('Output current wiki structure as JSON (for AI context)')
   .option('--pretty', 'Pretty-print the JSON output')
-  .action(async (opts: { pretty?: boolean }) => {
-    const { wikiPath } = await resolveWikiConfig();
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (opts: { pretty?: boolean; wiki?: string }) => {
+    const { wikiPath } = await resolveWikiConfig(opts.wiki);
 
     const [files, { tags, categories }] = await Promise.all([
       readdir(wikiPath).catch(() => [] as string[]),

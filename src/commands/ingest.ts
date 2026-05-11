@@ -15,8 +15,8 @@ import {
 } from '../providers/instagram';
 import { runInstagramAuth } from './auth';
 
-export const runIngest = async (): Promise<void> => {
-  const { wikiPath } = await resolveWikiConfig();
+export const runIngest = async (wikiFlag?: string): Promise<void> => {
+  const { wikiPath } = await resolveWikiConfig(wikiFlag);
   const linksFile = join(wikiPath, '_inbox', 'links.md');
 
   await ensureWikiDirs(wikiPath);
@@ -132,4 +132,5 @@ export const runIngest = async (): Promise<void> => {
 
 export const ingestCommand = new Command('ingest')
   .description('Ingest video links from $WIKI_PATH/_inbox/links.md')
-  .action(runIngest);
+  .option('--wiki <name>', 'Wiki to operate on')
+  .action(async (opts: { wiki?: string }) => runIngest(opts.wiki));
