@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import './config';
 import { Command } from 'commander';
 import { ingestCommand, runIngest } from './commands/ingest';
@@ -16,13 +15,18 @@ import { applyCommand } from './commands/apply';
 import { markProcessedCommand } from './commands/mark-processed';
 import { aiContextCommand } from './commands/ai-context';
 import { cleanupCommand } from './commands/cleanup';
+import { wikiCommand } from './commands/wiki';
 
 const program = new Command();
 
 program
   .name('app')
   .description('Video Knowledge Ingestion CLI')
-  .version('1.0.0');
+  .version('1.0.0')
+  .option(
+    '--wiki <name>',
+    'Wiki to operate on (overrides active wiki in registry)',
+  );
 
 program.addCommand(ingestCommand);
 program.addCommand(authCommand);
@@ -39,6 +43,7 @@ program.addCommand(applyCommand);
 program.addCommand(markProcessedCommand);
 program.addCommand(aiContextCommand);
 program.addCommand(cleanupCommand);
+program.addCommand(wikiCommand);
 
 program.action(runIngest);
 

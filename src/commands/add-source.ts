@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { readFile, appendFile, access } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { normalizeUrl } from '../utils/url';
 import { generateId } from '../utils/id';
 import { sourceExists } from '../utils/wiki';
@@ -11,7 +11,7 @@ export const addSourceCommand = new Command('add-source')
   .description('Add a URL directly to the inbox links file')
   .argument('<url>', 'Video URL to add')
   .action(async (url: string) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const linksFile = join(wikiPath, '_inbox', 'links.md');
 
     let normalized: ReturnType<typeof normalizeUrl>;

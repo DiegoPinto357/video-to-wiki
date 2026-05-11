@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { readFile, readdir } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { readTags } from '../utils/system';
 import type { SourceData } from '../types';
 import { extractSummary } from '../utils/doc-summary';
@@ -13,7 +13,7 @@ export const aiContextCommand = new Command('ai-context')
   )
   .argument('<id>', 'Source ID')
   .action(async (id: string) => {
-    const { wikiPath } = config;
+    const { wikiPath, wikiContext } = await resolveWikiConfig();
 
     // Get raw source
     const rawPath = join(wikiPath, '.system', 'sources', 'raw', `${id}.json`);
@@ -49,7 +49,7 @@ export const aiContextCommand = new Command('ai-context')
         {
           raw,
           structure: { docs, tags, categories },
-          ...(config.wikiContext ? { wikiContext: config.wikiContext } : {}),
+          ...(wikiContext ? { wikiContext } : {}),
         },
         null,
         2,

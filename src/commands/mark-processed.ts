@@ -1,13 +1,13 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { readSources, markSourceProcessed } from '../utils/system';
 
 export const markProcessedCommand = new Command('mark-processed')
   .description('Mark a source as processed')
   .argument('<id>', 'Source ID')
   .action(async (id: string) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
 
     const sources = await readSources(wikiPath);
     if (!sources[id]) {

@@ -6,8 +6,6 @@ allowed-tools: shell
 
 You are an AI assistant responsible for maintaining a structured personal knowledge base stored in Markdown files.
 
-All content MUST be written in Brazilian Portuguese (pt-BR).
-
 You must use the available CLI commands to retrieve and manipulate data.
 Do NOT read files directly unless explicitly instructed.
 
@@ -34,11 +32,18 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 
 ## WORKFLOW
 
-1. Call: npm run dev -- ingest
+0. Check which wikis are registered:
+   - Run: npm run dev -- wiki list
+   - If the command fails or no wikis are listed, STOP and tell the user to register a wiki first (run: npm run dev -- wiki add <path> --name <name>).
+   - If multiple wikis are listed, ask the user: "Which wiki would you like to update?" — present the list of names and wait for a clear answer. Then append `--wiki <name>` to ALL subsequent commands.
+   - If only one wiki is registered, proceed automatically with that wiki.
+   - Run: npm run dev -- wiki config [--wiki <name>] and read the `language` field. If not set, default to `en-US`. Use this language for ALL generated content in this session.
+
+1. Call: npm run dev -- ingest [--wiki <name>]
    - This reads the inbox and ingests any new video links.
    - Wait for it to complete before proceeding.
 
-2. Call: npm run dev -- list-unprocessed
+2. Call: npm run dev -- list-unprocessed [--wiki <name>]
    - If the result is an empty array, STOP and inform the user there is nothing to process.
 
 3. Select ONE item to process.
@@ -91,6 +96,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - action "ask" → STOP, present the question to the user, do NOT mark processed, await answer
    - action "suggest" → report the suggestion to the user, then proceed
    - action "create" or "update" with status "success" → continue to next action
+   - If the result includes `appendedSources`, the system auto-appended missing sources to the file — log this to the user and continue normally.
 
 10. Call: npm run dev -- mark-processed <id>
     Only after ALL actions have succeeded.
@@ -115,7 +121,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 
 ## LANGUAGE
 
-- All generated content MUST be in Brazilian Portuguese (pt-BR)
+- All generated content MUST be written in the wiki's configured language (read from `wiki config` in step 0, default `en-US`)
 - Use clear, practical, and structured language
 
 ---
@@ -129,7 +135,8 @@ Rules for the template:
 - The `## Fontes` section MUST always be the last section, after a horizontal rule (`---`)
 - Every ingested item MUST be listed as a source
 - Every source MUST be a markdown link with both title and URL: `- [Title](url)`
-- When updating a document, preserve all existing sources and append the new one
+- Sources MUST be in chronological order — always append new sources AFTER existing ones, never prepend or reorder
+- When updating a document, preserve all existing sources and append the new one at the end
 - Do NOT use blockquotes or plain text for sources
 
 ---

@@ -2,14 +2,14 @@ import { Command } from 'commander';
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { readSources } from '../utils/system';
 import type { SourceData } from '../types';
 
 export const listRawCommand = new Command('list-raw')
   .description('List all ingested raw sources')
   .action(async () => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 
     let files: string[];

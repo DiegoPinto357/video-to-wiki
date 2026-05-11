@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { readTags, addTag, removeTag } from '../utils/system';
 
 type Frontmatter = { tags?: string[] };
@@ -21,7 +21,7 @@ const parseFrontmatterTags = (content: string): string[] => {
 const listCommand = new Command('list')
   .description('List all defined tags')
   .action(async () => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const { categories, tags } = await readTags(wikiPath);
 
     if (categories.length === 0 && tags.length === 0) {
@@ -48,7 +48,7 @@ const listCommand = new Command('list')
 const validateCommand = new Command('validate')
   .description('Check that all docs only use tags defined in tags.json')
   .action(async () => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const { tags, categories } = await readTags(wikiPath);
     const defined = new Set([...tags, ...categories]);
     const docsDir = wikiPath;
@@ -89,7 +89,7 @@ const addCommand = new Command('add')
   .argument('<tags...>', 'Tag name(s) to add')
   .option('--category', 'Add as categories instead of tags')
   .action(async (tags: string[], opts: { category?: boolean }) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const type = opts.category ? 'category' : 'tag';
     await addTag(wikiPath, tags, type);
     console.log(JSON.stringify({ status: 'success', type, tags }));
@@ -100,7 +100,7 @@ const removeCommand = new Command('remove')
   .argument('<tag>', 'Tag name to remove')
   .option('--category', 'Remove from categories instead of tags')
   .action(async (tag: string, opts: { category?: boolean }) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const type = opts.category ? 'category' : 'tag';
     await removeTag(wikiPath, tag, type);
     console.log(JSON.stringify({ status: 'success', type, tag }));

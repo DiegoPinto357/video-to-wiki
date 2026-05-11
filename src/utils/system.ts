@@ -1,4 +1,4 @@
-import { readFile, writeFile, access } from 'fs/promises';
+import { readFile, writeFile, access, mkdir } from 'fs/promises';
 import { join } from 'path';
 
 export type TagsFile = {
@@ -13,6 +13,10 @@ export type SourceEntry = {
 export type SourcesFile = Record<string, SourceEntry>;
 
 export type ConfigFile = {
+  name?: string;
+  description?: string;
+  language?: string;
+  wikiContext?: string;
   backup: {
     enabled: boolean;
     maxVersions: number;
@@ -41,14 +45,17 @@ const writeJson = async (path: string, data: unknown): Promise<void> =>
   writeFile(path, JSON.stringify(data, null, 2), 'utf-8');
 
 export const initSystemFiles = async (wikiPath: string): Promise<void> => {
+  await mkdir(join(wikiPath, '.system'), { recursive: true });
+  await mkdir(join(wikiPath, '_inbox'), { recursive: true });
+
   const files: Array<[string, () => unknown]> = [
     ['tags.json', DEFAULTS.tags],
     ['sources.json', DEFAULTS.sources],
     ['config.json', DEFAULTS.config],
   ];
 
-  await Promise.all(
-    files.map(async ([file, defaultFn]) => {
+  await Promise.all([
+    ...files.map(async ([file, defaultFn]) => {
       const path = systemPath(wikiPath, file);
       try {
         await access(path);
@@ -56,11 +63,41 @@ export const initSystemFiles = async (wikiPath: string): Promise<void> => {
         await writeJson(path, defaultFn());
       }
     }),
-  );
+    (async () => {
+      const inboxPath = join(wikiPath, '_inbox', 'links.md');
+      try {
+        await access(inboxPath);
+      } catch {
+        await writeFile(inboxPath, '', 'utf-8');
+      }
+    })(),
+  ]);
 };
 
 export const readConfig = (wikiPath: string): Promise<ConfigFile> =>
   readJson(systemPath(wikiPath, 'config.json'), DEFAULTS.config);
+
+export const setConfigField = async (
+  wikiPath: string,
+  key: string,
+  value: string,
+): Promise<void> => {
+  const path = systemPath(wikiPath, 'config.json');
+  const config = await readConfig(wikiPath);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (config as any)[key] = value;
+  await writeJson(path, config);
+};
+
+export const patchConfig = async (
+  wikiPath: string,
+  fields: Partial<Omit<ConfigFile, 'backup'>>,
+): Promise<void> => {
+  const path = systemPath(wikiPath, 'config.json');
+  const config = await readConfig(wikiPath);
+  Object.assign(config, fields);
+  await writeJson(path, config);
+};
 
 export const readTags = (wikiPath: string): Promise<TagsFile> =>
   readJson(systemPath(wikiPath, 'tags.json'), DEFAULTS.tags);

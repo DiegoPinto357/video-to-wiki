@@ -5,6 +5,7 @@ import { join } from 'path';
 import { randomUUID } from 'crypto';
 import chalk from 'chalk';
 import { transcribeFile } from '../transcription/whisper';
+import { profileDir } from '../utils/registry';
 import type { SourceData } from '../types';
 
 type YtDlpMeta = {
@@ -51,15 +52,15 @@ export class InstagramAuthError extends Error {
   }
 }
 
-export const instagramCookiesPath = (wikiPath: string) =>
-  join(wikiPath, '.system', 'instagram-cookies.txt');
+export const browserStatePath = () => join(profileDir, 'browser-state');
+export const instagramCookiesPath = () =>
+  join(profileDir, 'instagram-cookies.txt');
 
 export const fetchInstagram = async (
   id: string,
   url: string,
-  wikiPath: string,
 ): Promise<SourceData> => {
-  const cookiesFile = instagramCookiesPath(wikiPath);
+  const cookiesFile = instagramCookiesPath();
 
   try {
     await access(cookiesFile);
@@ -74,10 +75,7 @@ export const fetchInstagram = async (
       if (err instanceof Error && err.message === 'SESSION_EXPIRED') {
         // Wipe stale session so auto-auth triggers on retry
         await rm(cookiesFile, { force: true });
-        await rm(join(wikiPath, 'System', 'browser-state'), {
-          recursive: true,
-          force: true,
-        });
+        await rm(browserStatePath(), { recursive: true, force: true });
         throw new InstagramAuthError();
       }
       throw err;

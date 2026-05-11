@@ -1,9 +1,9 @@
 import { Command } from 'commander';
 import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
 import chalk from 'chalk';
 import { chromium } from 'playwright';
-import { instagramCookiesPath } from '../providers/instagram';
+import { profileDir } from '../utils/registry';
+import { instagramCookiesPath, browserStatePath } from '../providers/instagram';
 
 type PlaywrightCookie = {
   name: string;
@@ -13,9 +13,6 @@ type PlaywrightCookie = {
   expires: number;
   secure: boolean;
 };
-
-export const browserStatePath = (wikiPath: string) =>
-  join(wikiPath, '.system', 'browser-state');
 
 const toCookiesTxt = (cookies: PlaywrightCookie[]): string => {
   const lines = ['# Netscape HTTP Cookie File', ''];
@@ -30,7 +27,7 @@ const toCookiesTxt = (cookies: PlaywrightCookie[]): string => {
   return lines.join('\n');
 };
 
-export const runInstagramAuth = async (wikiPath: string): Promise<void> => {
+export const runInstagramAuth = async (): Promise<void> => {
   console.log(chalk.cyan('Opening Instagram login page...'));
   console.log(
     chalk.yellow(
@@ -38,7 +35,7 @@ export const runInstagramAuth = async (wikiPath: string): Promise<void> => {
     ),
   );
 
-  const statePath = browserStatePath(wikiPath);
+  const statePath = browserStatePath();
   await mkdir(statePath, { recursive: true });
 
   // Persistent context: browser state is saved between runs so login is remembered
@@ -69,16 +66,16 @@ export const runInstagramAuth = async (wikiPath: string): Promise<void> => {
   await context.close();
 
   const cookiesTxt = toCookiesTxt(cookies as PlaywrightCookie[]);
-  await writeFile(instagramCookiesPath(wikiPath), cookiesTxt, 'utf-8');
+  await writeFile(instagramCookiesPath(), cookiesTxt, 'utf-8');
 
   console.log(chalk.green('✓ Instagram session saved.\n'));
+  console.log(chalk.dim(`  Stored in: ${profileDir}`));
 };
 
 const instagramCommand = new Command('instagram')
   .description('Log in to Instagram and save session for ingestion')
   .action(async () => {
-    const { config } = await import('../config');
-    await runInstagramAuth(config.wikiPath);
+    await runInstagramAuth();
     console.log(chalk.green('You can now ingest Instagram links.'));
   });
 

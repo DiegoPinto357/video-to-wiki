@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { readFile, writeFile, access } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { readSources, markSourceProcessed } from '../utils/system';
 import type { SourceData } from '../types';
 
@@ -51,7 +51,7 @@ export const writeDocCommand = new Command('write-doc')
   .description('Create an Obsidian doc from a raw source')
   .argument('[id]', 'Source ID (omit to process all unprocessed sources)')
   .action(async (id?: string) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const sources = await readSources(wikiPath);
     const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 
@@ -88,7 +88,7 @@ export const writeDocCommand = new Command('write-doc')
       }
 
       await writeFile(outPath, buildDoc(data), 'utf-8');
-      await markSourceProcessed(wikiPath, sourceId, outPath);
+      await markSourceProcessed(wikiPath, sourceId);
       console.log(chalk.green(`✓ Written: ${outPath}`));
     }
   });

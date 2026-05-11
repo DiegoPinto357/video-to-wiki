@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { readFile, access } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { normalizeUrl } from '../utils/url';
 import { generateId } from '../utils/id';
 import { ensureWikiDirs, sourceExists, saveSource } from '../utils/wiki';
@@ -16,7 +16,7 @@ import {
 import { runInstagramAuth } from './auth';
 
 export const runIngest = async (): Promise<void> => {
-  const { wikiPath } = config;
+  const { wikiPath } = await resolveWikiConfig();
   const linksFile = join(wikiPath, '_inbox', 'links.md');
 
   await ensureWikiDirs(wikiPath);
@@ -49,14 +49,14 @@ export const runIngest = async (): Promise<void> => {
   });
 
   if (hasInstagram) {
-    const cookiesExist = await access(instagramCookiesPath(wikiPath))
+    const cookiesExist = await access(instagramCookiesPath())
       .then(() => true)
       .catch(() => false);
     if (!cookiesExist) {
       console.log(
         chalk.yellow('Instagram links detected — authentication required.\n'),
       );
-      await runInstagramAuth(wikiPath);
+      await runInstagramAuth();
     }
   }
 
@@ -98,14 +98,14 @@ export const runIngest = async (): Promise<void> => {
         data = await fetchYouTube(id, normalized.url);
       } else if (normalized.source === 'instagram') {
         try {
-          data = await fetchInstagram(id, normalized.url, wikiPath);
+          data = await fetchInstagram(id, normalized.url);
         } catch (err) {
           if (err instanceof InstagramAuthError) {
             console.log(
               chalk.yellow('\n  Session expired — re-authenticating...'),
             );
-            await runInstagramAuth(wikiPath);
-            data = await fetchInstagram(id, normalized.url, wikiPath);
+            await runInstagramAuth();
+            data = await fetchInstagram(id, normalized.url);
           } else {
             throw err;
           }

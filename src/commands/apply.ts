@@ -3,7 +3,7 @@ import { readFile, writeFile, access } from 'fs/promises';
 import { join, isAbsolute } from 'path';
 import chalk from 'chalk';
 import { jsonrepair } from 'jsonrepair';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { backupFile } from '../utils/backup';
 
 type AiAction = 'create' | 'update' | 'suggest' | 'ask';
@@ -35,6 +35,7 @@ type ApplyResult = {
   file?: string;
   question?: string;
   message?: string;
+  appendedSources?: string[];
 };
 
 const deduplicateSources = (
@@ -46,6 +47,25 @@ const deduplicateSources = (
     seen.add(s.url);
     return true;
   });
+};
+
+const ensureSources = async (
+  filePath: string,
+  sources: Array<{ title: string; url: string }>,
+): Promise<Array<{ title: string; url: string }>> => {
+  const content = await readFile(filePath, 'utf-8');
+  const missing = sources.filter(s => !content.includes(s.url));
+  if (missing.length === 0) return [];
+
+  const newLines = missing.map(s => `- [${s.title}](${s.url})`).join('\n');
+  let updated: string;
+  if (/\n---(\n|$)/.test(content)) {
+    updated = content.trimEnd() + '\n' + newLines + '\n';
+  } else {
+    updated = content.trimEnd() + '\n\n---\n\n## Fontes\n\n' + newLines + '\n';
+  }
+  await writeFile(filePath, updated, 'utf-8');
+  return missing;
 };
 
 const resolveTarget = (wikiPath: string, target: string): string =>
@@ -128,11 +148,17 @@ const applyWrite = async (
     process.exit(1);
   }
 
+  const appended =
+    sources.length > 0 ? await ensureSources(targetPath, sources) : [];
+
   if (jsonOutput) {
     const result: ApplyResult = {
       status: 'success',
       action: payload.action,
       file: payload.target,
+      ...(appended.length > 0
+        ? { appendedSources: appended.map(s => s.title) }
+        : {}),
     };
     console.log(JSON.stringify(result));
   } else {
@@ -144,6 +170,13 @@ const applyWrite = async (
     if (sources.length) {
       console.log(
         chalk.gray(`  Sources: ${sources.map(s => s.title).join(', ')}`),
+      );
+    }
+    if (appended.length) {
+      console.log(
+        chalk.yellow(
+          `  ⚠ Auto-appended missing sources: ${appended.map(s => s.title).join(', ')}`,
+        ),
       );
     }
   }
@@ -186,7 +219,7 @@ export const applyCommand = new Command('apply')
   )
   .option('--json', 'Output result as JSON')
   .action(async (file: string, opts: { json?: boolean }) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const jsonOutput = !!opts.json;
 
     let raw: string;

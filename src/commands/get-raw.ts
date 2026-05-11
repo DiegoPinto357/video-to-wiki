@@ -2,14 +2,14 @@ import { Command } from 'commander';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import type { SourceData } from '../types';
 
 export const getRawCommand = new Command('get-raw')
   .description('Return full raw content for a source by ID')
   .argument('<id>', 'Source ID')
   .action(async (id: string) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const filePath = join(wikiPath, '.system', 'sources', 'raw', `${id}.json`);
 
     let data: SourceData;

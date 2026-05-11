@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { readFile, writeFile, unlink, access } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { readSources } from '../utils/system';
 import { normalizeUrl } from '../utils/url';
 import { generateId } from '../utils/id';
@@ -13,7 +13,7 @@ export const cleanupCommand = new Command('cleanup')
   )
   .option('--dry-run', 'Show what would be removed without making changes')
   .action(async (opts: { dryRun?: boolean }) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const dryRun = !!opts.dryRun;
 
     if (dryRun) {

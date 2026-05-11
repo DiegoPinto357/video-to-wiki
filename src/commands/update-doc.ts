@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { readFile, writeFile, access } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { readSources, markSourceProcessed } from '../utils/system';
 import { backupFile } from '../utils/backup';
 import { buildDoc, docPath } from './write-doc';
@@ -14,7 +14,7 @@ export const updateDocCommand = new Command('update-doc')
   )
   .argument('[id]', 'Source ID (omit to update all processed sources)')
   .action(async (id?: string) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const sources = await readSources(wikiPath);
     const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 
@@ -44,7 +44,7 @@ export const updateDocCommand = new Command('update-doc')
 
       await backupFile(wikiPath, outPath);
       await writeFile(outPath, buildDoc(data), 'utf-8');
-      await markSourceProcessed(wikiPath, sourceId, outPath);
+      await markSourceProcessed(wikiPath, sourceId);
       console.log(chalk.green(`✓ Updated: ${outPath}`));
     }
   });

@@ -1,14 +1,14 @@
 import { Command } from 'commander';
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 import { readSources } from '../utils/system';
 import type { SourceData } from '../types';
 
 export const listUnprocessedCommand = new Command('list-unprocessed')
   .description('List unprocessed sources as JSON (no transcript)')
   .action(async () => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const rawDir = join(wikiPath, '.system', 'sources', 'raw');
 
     let files: string[];

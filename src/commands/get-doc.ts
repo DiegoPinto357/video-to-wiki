@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { readFile, access } from 'fs/promises';
 import { join, basename } from 'path';
 import chalk from 'chalk';
-import { config } from '../config';
+import { resolveWikiConfig } from '../config';
 
 type DocSource = { title: string; url: string };
 
@@ -29,7 +29,7 @@ export const getDocCommand = new Command('get-doc')
   .description('Return full content and metadata for a wiki document')
   .argument('<file>', 'Document filename (e.g. "My Doc.md")')
   .action(async (file: string) => {
-    const { wikiPath } = config;
+    const { wikiPath } = await resolveWikiConfig();
     const filePath = join(wikiPath, file);
 
     try {
