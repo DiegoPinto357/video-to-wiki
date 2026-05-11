@@ -50,6 +50,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - Call: npm run dev -- get-doc <file> for each candidate.
    - Use the existing doc content ONLY as reference for structure and to avoid duplication.
    - The new content to be written comes EXCLUSIVELY from the current source (`ai-context` output). Do NOT copy or migrate content from existing documents into the new one.
+   - Note which existing docs are related — they will be linked in step 8.
 
 6. Think about folder structure (REQUIRED):
    - Review the existing docs list from ai-context. Is there a natural folder for this content?
@@ -62,7 +63,13 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - If no relevant tags exist, use the `ask` action to propose new ones BEFORE writing the document. Wait for user approval.
    - Once approved, add all tags in a single call: npm run dev -- tags add <tag1> <tag2> ...
 
-8. Write the JSON to a temp file and pass it to apply:
+8. Plan ALL actions for this source before writing anything:
+   - A single source may contain content for multiple documents.
+   - Identify each distinct topic and decide whether it updates an existing doc or creates a new one.
+   - For each action, identify which other wiki docs are related and should be cross-linked.
+   - Present the full plan to the user (e.g. "I will update X and create Y and Z, linking Y↔Z and Y→X") and wait for approval before proceeding.
+
+9. Execute each approved action in sequence using a temp file:
 
    cat > /tmp/wiki-apply.json << 'ENDJSON'
    { ...json... }
@@ -75,16 +82,18 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - Follow the document template exactly (see template.md)
    - Include approved tags on the first line as Obsidian inline tags: `#tag1 #tag2 #tag3`
    - If no tags were approved yet, use the `ask` action BEFORE writing the document
+   - Include Obsidian wikilinks (`[[Doc Name]]`) to related documents where contextually relevant — inline within the text, not just at the end. When updating an existing doc, also add links to any newly created docs from this same source.
 
-   Check the returned status:
+   Check the returned status after each apply call:
    - status "error" → STOP, report the error to the user, do NOT mark processed
    - action "ask" → STOP, present the question to the user, do NOT mark processed, await answer
    - action "suggest" → report the suggestion to the user, then proceed
-   - action "create" or "update" with status "success" → proceed to step 10
+   - action "create" or "update" with status "success" → continue to next action
 
-9. Call: npm run dev -- mark-processed <id>
+10. Call: npm run dev -- mark-processed <id>
+    Only after ALL actions have succeeded.
 
-10. Report a summary of what was done (document created/updated, tags added, folder structure) and STOP. The user will re-invoke the skill to process the next item.
+11. Report a summary of what was done (documents created/updated, tags added, folder structure) and STOP. The user will re-invoke the skill to process the next item.
 
 ---
 
@@ -98,6 +107,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 - NEVER place documents in a subfolder unless the user has explicitly approved that folder structure in this session. If you think a subfolder would help organize the content, use the `suggest` action and wait for approval before writing the document there.
 - Think about the wiki as a whole: when creating a new document, consider how it fits in a growing structure and propose tags/folders to the user
 - If there is any ambiguity (tags, folders, naming, classification), ASK the user before proceeding
+- ALWAYS add Obsidian wikilinks (`[[Doc Name]]`) between related documents — links should appear naturally within the text where the topic is mentioned, not just appended at the end
 
 ---
 
