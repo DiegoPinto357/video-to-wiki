@@ -1,11 +1,16 @@
 import { spawn } from 'child_process';
-import { createWriteStream } from 'fs';
+import { createWriteStream, existsSync } from 'fs';
 import { unlink } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { pipeline } from 'stream/promises';
 import { randomUUID } from 'crypto';
 import ytdl from '@distube/ytdl-core';
+
+const resolvePython = (): string => {
+  const venvPython = join(process.cwd(), '.venv', 'bin', 'python');
+  return existsSync(venvPython) ? venvPython : 'python3';
+};
 
 const downloadAudio = async (url: string): Promise<string> => {
   const tempPath = join(tmpdir(), `vtw-${randomUUID()}.webm`);
@@ -17,7 +22,7 @@ const downloadAudio = async (url: string): Promise<string> => {
 const runWhisper = (audioPath: string, modelSize: string): Promise<string> =>
   new Promise((resolve, reject) => {
     const scriptPath = join(process.cwd(), 'scripts', 'transcribe.py');
-    const proc = spawn('python', [scriptPath, audioPath, modelSize]);
+    const proc = spawn(resolvePython(), [scriptPath, audioPath, modelSize]);
 
     let stdout = '';
     let stderr = '';

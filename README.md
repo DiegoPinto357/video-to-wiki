@@ -17,7 +17,7 @@ CLI tool that ingests YouTube and Instagram videos into an [Obsidian](https://ob
 | Python ≥ 3.9                                                | [python.org](https://python.org)  |
 | [yt-dlp](https://github.com/yt-dlp/yt-dlp)                  | `brew install yt-dlp`             |
 | [ffmpeg](https://ffmpeg.org)                                | `brew install ffmpeg`             |
-| [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | `pip install faster-whisper`      |
+| [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | See below                         |
 | Playwright Chromium                                         | `npx playwright install chromium` |
 
 > **Note:** yt-dlp, ffmpeg, faster-whisper, and Playwright are only required for Instagram ingestion. YouTube videos use the native transcript API and only fall back to Whisper when no captions are available.
@@ -30,9 +30,18 @@ CLI tool that ingests YouTube and Instagram videos into an [Obsidian](https://ob
 git clone <repo-url>
 cd video-to-wiki
 npm install
-pip install faster-whisper
 npx playwright install chromium
 ```
+
+**faster-whisper** requires a Python virtual environment (macOS systems managed by Homebrew don't allow system-wide pip installs):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install faster-whisper
+```
+
+> The `.venv` is detected and used automatically at runtime — no need to activate it manually before running ingestion.
 
 ### 2. Set up your first wiki
 
