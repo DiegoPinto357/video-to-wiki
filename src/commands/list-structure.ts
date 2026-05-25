@@ -1,9 +1,9 @@
 import { Command } from 'commander';
-import { readdir } from 'fs/promises';
 import { join } from 'path';
 import { resolveWikiConfig } from '../config';
 import { readTags } from '../utils/system';
 import { extractSummary } from '../utils/doc-summary';
+import { findMarkdownFiles } from '../utils/wiki';
 
 type WikiStructure = {
   docs: Array<{
@@ -23,11 +23,11 @@ export const listStructureCommand = new Command('list-structure')
     const { wikiPath } = await resolveWikiConfig(opts.wiki);
 
     const [files, { tags, categories }] = await Promise.all([
-      readdir(wikiPath).catch(() => [] as string[]),
+      findMarkdownFiles(wikiPath),
       readTags(wikiPath),
     ]);
 
-    const docFiles = files.filter(f => f.endsWith('.md'));
+    const docFiles = files;
 
     const docs = await Promise.all(
       docFiles.map(async file => {

@@ -1,11 +1,12 @@
 import { Command } from 'commander';
-import { readFile, readdir } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
 import { resolveWikiConfig } from '../config';
 import { readTags } from '../utils/system';
 import type { SourceData } from '../types';
 import { extractSummary } from '../utils/doc-summary';
+import { findMarkdownFiles } from '../utils/wiki';
 
 export const aiContextCommand = new Command('ai-context')
   .description(
@@ -28,21 +29,19 @@ export const aiContextCommand = new Command('ai-context')
 
     // Get wiki structure
     const [files, { tags, categories }] = await Promise.all([
-      readdir(wikiPath).catch(() => [] as string[]),
+      findMarkdownFiles(wikiPath),
       readTags(wikiPath),
     ]);
 
     const docs = await Promise.all(
-      files
-        .filter(f => f.endsWith('.md'))
-        .map(async file => {
-          const fullPath = join(wikiPath, file);
-          const title = file
-            .replace(/\s\[[a-f0-9]+\]\.md$/, '')
-            .replace(/\.md$/, '');
-          const summary = await extractSummary(fullPath);
-          return { title, path: file, summary };
-        }),
+      files.map(async file => {
+        const fullPath = join(wikiPath, file);
+        const title = file
+          .replace(/\s\[[a-f0-9]+\]\.md$/, '')
+          .replace(/\.md$/, '');
+        const summary = await extractSummary(fullPath);
+        return { title, path: file, summary };
+      }),
     );
 
     console.log(

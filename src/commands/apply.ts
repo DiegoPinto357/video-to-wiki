@@ -1,10 +1,17 @@
 import { Command } from 'commander';
-import { readFile, writeFile, access } from 'fs/promises';
-import { join, isAbsolute } from 'path';
+import { readFile, writeFile, access, mkdir } from 'fs/promises';
+import { join, isAbsolute, dirname } from 'path';
 import chalk from 'chalk';
 import { jsonrepair } from 'jsonrepair';
 import { resolveWikiConfig } from '../config';
 import { backupFile } from '../utils/backup';
+import { addTag, readTags } from '../utils/system';
+
+const extractInlineTags = (content: string): string[] => {
+  const firstLine = content.trimStart().split('\n')[0] ?? '';
+  const matches = [...firstLine.matchAll(/#([\p{L}\p{N}_-]+)/gu)];
+  return matches.map(m => m[1] ?? '').filter(Boolean);
+};
 
 type AiAction = 'create' | 'update' | 'suggest' | 'ask';
 
@@ -36,6 +43,7 @@ type ApplyResult = {
   question?: string;
   message?: string;
   appendedSources?: string[];
+  autoRegisteredTags?: string[];
 };
 
 const deduplicateSources = (
@@ -130,6 +138,7 @@ const applyWrite = async (
   const finalPayload = { ...payload, sources };
 
   try {
+    await mkdir(dirname(targetPath), { recursive: true });
     await writeFile(targetPath, finalPayload.content, 'utf-8');
   } catch (err) {
     const msg = `Failed to write file "${payload.target}": ${err instanceof Error ? err.message : String(err)}`;
@@ -151,6 +160,18 @@ const applyWrite = async (
   const appended =
     sources.length > 0 ? await ensureSources(targetPath, sources) : [];
 
+  // Auto-register any inline #tags from the content that aren't in tags.json yet
+  const inlineTags = extractInlineTags(finalPayload.content);
+  let newTags: string[] = [];
+  if (inlineTags.length > 0) {
+    const existing = await readTags(wikiPath);
+    const allKnown = new Set([...existing.tags, ...existing.categories]);
+    newTags = inlineTags.filter(t => !allKnown.has(t));
+    if (newTags.length > 0) {
+      await addTag(wikiPath, newTags, 'tag');
+    }
+  }
+
   if (jsonOutput) {
     const result: ApplyResult = {
       status: 'success',
@@ -159,6 +180,7 @@ const applyWrite = async (
       ...(appended.length > 0
         ? { appendedSources: appended.map(s => s.title) }
         : {}),
+      ...(newTags.length > 0 ? { autoRegisteredTags: newTags } : {}),
     };
     console.log(JSON.stringify(result));
   } else {
@@ -178,6 +200,9 @@ const applyWrite = async (
           `  ⚠ Auto-appended missing sources: ${appended.map(s => s.title).join(', ')}`,
         ),
       );
+    }
+    if (newTags.length > 0) {
+      console.log(chalk.gray(`  Auto-registered tags: ${newTags.join(', ')}`));
     }
   }
 };

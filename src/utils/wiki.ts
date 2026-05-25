@@ -1,7 +1,34 @@
-import { mkdir, writeFile, access } from 'fs/promises';
-import { join } from 'path';
+import { mkdir, writeFile, access, readdir, stat } from 'fs/promises';
+import { join, relative } from 'path';
 import type { SourceData } from '../types';
 import { initSystemFiles } from './system';
+
+const EXCLUDED_DIRS = new Set(['.system', '_inbox', '.git', 'node_modules']);
+
+export const findMarkdownFiles = async (
+  wikiPath: string,
+  dir = wikiPath,
+): Promise<string[]> => {
+  const entries = await readdir(dir).catch(() => [] as string[]);
+  const results: string[] = [];
+
+  await Promise.all(
+    entries.map(async entry => {
+      const fullPath = join(dir, entry);
+      const s = await stat(fullPath).catch(() => null);
+      if (!s) return;
+      if (s.isDirectory()) {
+        if (!EXCLUDED_DIRS.has(entry)) {
+          results.push(...(await findMarkdownFiles(wikiPath, fullPath)));
+        }
+      } else if (entry.endsWith('.md')) {
+        results.push(relative(wikiPath, fullPath));
+      }
+    }),
+  );
+
+  return results;
+};
 
 export const ensureWikiDirs = async (wikiPath: string): Promise<void> => {
   const dirs = [

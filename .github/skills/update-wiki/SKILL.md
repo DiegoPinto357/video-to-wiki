@@ -57,6 +57,14 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - The new content to be written comes EXCLUSIVELY from the current source (`ai-context` output). Do NOT copy or migrate content from existing documents into the new one.
    - Note which existing docs are related — they will be linked in step 8.
 
+   **When updating an existing document:**
+   - The existing document's content is the SOURCE OF TRUTH. Preserve all existing knowledge.
+   - ADD new sections or expand existing ones with content from the new source.
+   - Light restructuring is allowed: you may rename a section, merge two closely related sections, or reorder sections for better flow — but NEVER remove or summarize existing content in the process.
+   - NEVER collapse detailed sections into bullet lists.
+   - NEVER remove or alter existing wikilinks (`[[...]]`).
+   - If you plan any restructuring beyond simply adding content, describe it in the plan (step 8) and wait for user approval before proceeding.
+
 6. Think about folder structure (REQUIRED):
    - Review the existing docs list from ai-context. Is there a natural folder for this content?
    - If a relevant subfolder doesn't exist yet but would help organize 2+ related docs, use the `suggest` action to propose it. Wait for user approval before placing the doc there.
@@ -66,7 +74,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - Check `wikiContext` (if present) — do NOT suggest tags that merely restate the wiki's overall scope.
    - Check existing tags/categories from the structure output.
    - If no relevant tags exist, use the `ask` action to propose new ones BEFORE writing the document. Wait for user approval.
-   - Once approved, add all tags in a single call: npm run dev -- tags add <tag1> <tag2> ...
+   - Tags will be auto-registered in `tags.json` when the document is applied — no need to call `tags add` manually.
 
 8. Plan ALL actions for this source before writing anything:
    - A single source may contain content for multiple documents.
@@ -97,6 +105,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - action "suggest" → report the suggestion to the user, then proceed
    - action "create" or "update" with status "success" → continue to next action
    - If the result includes `appendedSources`, the system auto-appended missing sources to the file — log this to the user and continue normally.
+   - If the result includes `autoRegisteredTags`, the system auto-registered new tags from the document — log this to the user and continue normally.
 
 10. Call: npm run dev -- mark-processed <id>
     Only after ALL actions have succeeded.
@@ -111,11 +120,12 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 - Documents are long-lived and accumulate knowledge
 - NEVER duplicate content unnecessarily
 - NEVER create new documents for small variations of existing topics
-- NEVER create tags, categories, or folders without explicit user approval — always ask first
+- NEVER tags, categories, or folders without explicit user approval — always ask first
 - NEVER place documents in a subfolder unless the user has explicitly approved that folder structure in this session. If you think a subfolder would help organize the content, use the `suggest` action and wait for approval before writing the document there.
 - Think about the wiki as a whole: when creating a new document, consider how it fits in a growing structure and propose tags/folders to the user
 - If there is any ambiguity (tags, folders, naming, classification), ASK the user before proceeding
 - ALWAYS add Obsidian wikilinks (`[[Doc Name]]`) between related documents — links should appear naturally within the text where the topic is mentioned, not just appended at the end
+- **When updating a document, NEVER remove or summarize existing content.** Light restructuring (renaming a section, merging two closely related points, reordering sections) is allowed but must be described in the plan and approved by the user before execution. NEVER collapse detailed sections into bullet lists.
 
 ---
 
