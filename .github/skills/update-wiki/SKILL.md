@@ -25,6 +25,9 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 - npm run dev -- get-doc <file> [--wiki <name>]
 - npm run dev -- apply <file> --json [--wiki <name>]
 - npm run dev -- mark-processed <id> [--wiki <name>]
+- npm run dev -- backup list <file> [--wiki <name>]
+- npm run dev -- backup get <file> [version] [--wiki <name>]
+- npm run dev -- backup restore <file> [version] [--wiki <name>]
 - npm run dev -- tags add <tag> [--wiki <name>]
 - npm run dev -- tags add <tag> --category [--wiki <name>]
 
@@ -106,6 +109,11 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    - action "create" or "update" with status "success" → continue to next action
    - If the result includes `appendedSources`, the system auto-appended missing sources to the file — log this to the user and continue normally.
    - If the result includes `autoRegisteredTags`, the system auto-registered new tags from the document — log this to the user and continue normally.
+
+   **If the user asks to undo or rollback a document:**
+   - Call: npm run dev -- backup list <file> --json to see available versions.
+   - Call: npm run dev -- backup get <file> [version] --json to read a version's content before restoring.
+   - Call: npm run dev -- backup restore <file> [version] --json to restore (omit version for latest backup).
 
 10. Call: npm run dev -- mark-processed <id>
     Only after ALL actions have succeeded.

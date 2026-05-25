@@ -16,6 +16,7 @@ import { markProcessedCommand } from './commands/mark-processed';
 import { aiContextCommand } from './commands/ai-context';
 import { cleanupCommand } from './commands/cleanup';
 import { wikiCommand } from './commands/wiki';
+import { backupCommand } from './commands/backup';
 
 const program = new Command();
 
@@ -40,6 +41,7 @@ program.addCommand(markProcessedCommand);
 program.addCommand(aiContextCommand);
 program.addCommand(cleanupCommand);
 program.addCommand(wikiCommand);
+program.addCommand(backupCommand);
 
 program.action(() => {
   const opts = program.opts<{ wiki?: string }>();
