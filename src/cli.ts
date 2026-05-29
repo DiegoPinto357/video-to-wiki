@@ -17,6 +17,7 @@ import { aiContextCommand } from './commands/ai-context';
 import { cleanupCommand } from './commands/cleanup';
 import { wikiCommand } from './commands/wiki';
 import { backupCommand } from './commands/backup';
+import { statusCommand } from './commands/status';
 
 const program = new Command();
 
@@ -42,6 +43,7 @@ program.addCommand(aiContextCommand);
 program.addCommand(cleanupCommand);
 program.addCommand(wikiCommand);
 program.addCommand(backupCommand);
+program.addCommand(statusCommand);
 
 program.action(() => {
   const opts = program.opts<{ wiki?: string }>();
