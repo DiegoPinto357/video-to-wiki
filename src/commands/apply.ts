@@ -76,8 +76,10 @@ const ensureSources = async (
   return missing;
 };
 
-const resolveTarget = (wikiPath: string, target: string): string =>
-  isAbsolute(target) ? target : join(wikiPath, target);
+const resolveTarget = (wikiPath: string, target: string): string => {
+  const normalized = target.normalize('NFC');
+  return isAbsolute(normalized) ? normalized : join(wikiPath, normalized);
+};
 
 const applyWrite = async (
   wikiPath: string,
@@ -117,6 +119,7 @@ const applyWrite = async (
   }
 
   const targetPath = resolveTarget(wikiPath, payload.target);
+  payload.target = payload.target.normalize('NFC');
 
   const exists = await access(targetPath)
     .then(() => true)
