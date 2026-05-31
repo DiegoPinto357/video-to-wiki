@@ -36,8 +36,8 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
 ## WORKFLOW
 
 0. Check which wikis are registered:
-   - Run: npm run dev -- wiki list
-   - If the command fails or no wikis are listed, STOP and tell the user to register a wiki first (run: npm run dev -- wiki add <path> --name <name>).
+   - Run: npm run dev -- wiki list --type knowledge
+   - If the command fails or no wikis are listed, STOP and tell the user to register a knowledge wiki first (run: npm run dev -- wiki add <path> --name <name>, then wiki init with --type knowledge).
    - If multiple wikis are listed, ask the user: "Which wiki would you like to update?" — present the list of names and wait for a clear answer. Then append `--wiki <name>` to ALL subsequent commands.
    - If only one wiki is registered, proceed automatically with that wiki.
    - Run: npm run dev -- wiki config [--wiki <name>] and read the `language` field. If not set, default to `en-US`. Use this language for ALL generated content in this session.

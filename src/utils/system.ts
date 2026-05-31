@@ -17,6 +17,7 @@ export type ConfigFile = {
   description?: string;
   language?: string;
   wikiContext?: string;
+  type?: 'knowledge' | 'recipe';
   backup: {
     enabled: boolean;
     maxVersions: number;

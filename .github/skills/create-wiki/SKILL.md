@@ -37,6 +37,11 @@ npm run dev -- <command>
    e. **Wiki context** (a more detailed description to guide the AI agent — what topics, what NOT to tag, what's the scope)
    - Example: "This wiki covers family recipes passed down through generations. Avoid generic tags like 'food' or 'cooking'. Focus on specific dishes, techniques, and ingredients."
 
+   f. **Wiki type** — ask: "Is this a knowledge wiki or a recipe wiki?"
+   - `knowledge` (default): knowledge base where multiple videos can contribute to the same document.
+   - `recipe`: strict 1:1 — one video always produces one recipe document, with a fixed recipe template.
+   - If the user is unsure, briefly explain the difference and ask again.
+
 3. Once all information is collected, summarize it to the user:
 
    ```
@@ -44,6 +49,7 @@ npm run dev -- <command>
    Path:         <path>
    Description:  <description>
    Language:     <language>
+   Type:         <type>
    Context:      <wikiContext>
    ```
 
@@ -63,6 +69,7 @@ npm run dev -- <command>
    npm run dev -- wiki init "<name>" \
      --description "<description>" \
      --language "<language>" \
+     --type "<type>" \
      --wiki-context "$(cat tmp/wiki-wikicontext.txt)"
    ```
 
@@ -76,7 +83,8 @@ npm run dev -- <command>
    - Wiki registered at `<path>`
    - System files initialized
    - Configuration saved
-   - Remind the user: "Add links to `<path>/_inbox/links.md` and run the `update-wiki` skill to start ingesting content."
+   - Remind the user: "Add links to `<path>/_inbox/links.md` and run the `update-wiki` skill to start ingesting content." (for knowledge wikis)
+   - For recipe wikis: "Add links to `<path>/_inbox/links.md` and run the `update-recipes` skill to start ingesting recipes."
 
 ---
 

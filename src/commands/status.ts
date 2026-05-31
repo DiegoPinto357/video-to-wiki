@@ -3,7 +3,7 @@ import { readdir, readFile } from 'fs/promises';
 import { join, resolve } from 'path';
 import chalk from 'chalk';
 import { readRegistry } from '../utils/registry';
-import { readSources } from '../utils/system';
+import { readSources, readConfig } from '../utils/system';
 import { sourceExists } from '../utils/wiki';
 import { normalizeUrl } from '../utils/url';
 import { generateId } from '../utils/id';
@@ -20,6 +20,7 @@ type UnprocessedItem = {
 type WikiStatus = {
   name: string;
   path: string;
+  type: 'knowledge' | 'recipe';
   pendingLinks: string[];
   unprocessed: UnprocessedItem[];
   error?: string;
@@ -109,15 +110,24 @@ export const statusCommand = new Command('status')
       registry.wikis.map(async wiki => {
         const wikiPath = resolve(wiki.path);
         try {
-          const [pendingLinks, unprocessed] = await Promise.all([
+          const [pendingLinks, unprocessed, config] = await Promise.all([
             getPendingLinks(wikiPath),
             getUnprocessed(wikiPath),
+            readConfig(wikiPath),
           ]);
-          return { name: wiki.name, path: wikiPath, pendingLinks, unprocessed };
+          const type = config.type ?? 'knowledge';
+          return {
+            name: wiki.name,
+            path: wikiPath,
+            type,
+            pendingLinks,
+            unprocessed,
+          };
         } catch (err) {
           return {
             name: wiki.name,
             path: wikiPath,
+            type: 'knowledge' as const,
             pendingLinks: [],
             unprocessed: [],
             error: String(err),
@@ -141,7 +151,8 @@ export const statusCommand = new Command('status')
       const hasAnything =
         wiki.pendingLinks.length > 0 || wiki.unprocessed.length > 0;
       const marker = hasAnything ? chalk.green('●') : chalk.dim('○');
-      console.log(`${marker} ${chalk.bold(wiki.name)}`);
+      const typeLabel = wiki.type === 'recipe' ? chalk.dim(' (recipe)') : '';
+      console.log(`${marker} ${chalk.bold(wiki.name)}${typeLabel}`);
 
       if (wiki.error) {
         console.log(`  ${chalk.red(`Error: ${wiki.error}`)}`);

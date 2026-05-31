@@ -7,6 +7,7 @@ import {
   saveRegistry,
   resolveWiki,
   profileDir,
+  type Registry,
 } from '../utils/registry';
 import {
   initSystemFiles,
@@ -15,17 +16,41 @@ import {
   patchConfig,
 } from '../utils/system';
 
+const filterWikisByType = async (
+  wikis: Registry['wikis'],
+  type: string,
+): Promise<Registry['wikis']> => {
+  const configs = await Promise.all(
+    wikis.map(async w => {
+      const cfg = await readConfig(resolve(w.path)).catch(() => null);
+      return { wiki: w, type: cfg?.type ?? 'knowledge' };
+    }),
+  );
+  return configs.filter(c => c.type === type).map(c => c.wiki);
+};
+
 const listCommand = new Command('list')
   .description('List all registered wikis')
-  .action(async () => {
+  .option('--type <type>', 'Filter by wiki type: knowledge or recipe')
+  .action(async (opts: { type?: string }) => {
     const registry = await readRegistry();
     if (registry.wikis.length === 0) {
       console.log(chalk.yellow('No wikis registered.'));
       console.log('  Add one: npm run dev -- wiki add <path> --name <name>');
       return;
     }
+
+    const wikis = opts.type
+      ? await filterWikisByType(registry.wikis, opts.type)
+      : registry.wikis;
+
+    if (wikis.length === 0) {
+      console.log(chalk.yellow(`No ${opts.type} wikis registered.`));
+      return;
+    }
+
     console.log('Registered wikis:\n');
-    for (const w of registry.wikis) {
+    for (const w of wikis) {
       const active = w.name === registry.activeWiki;
       const marker = active ? chalk.green('● ') : '  ';
       console.log(`${marker}${chalk.bold(w.name)}`);
@@ -93,14 +118,29 @@ const initCommand = new Command('init')
   .option('--description <text>', 'Wiki description')
   .option('--language <lang>', 'Content language (e.g. pt-BR, en-US)')
   .option('--wiki-context <text>', 'AI context hint for the wiki')
+  .option('--type <type>', 'Wiki type: knowledge (default) or recipe')
   .action(
     async (
       name: string,
-      opts: { description?: string; language?: string; wikiContext?: string },
+      opts: {
+        description?: string;
+        language?: string;
+        wikiContext?: string;
+        type?: string;
+      },
     ) => {
       const result = await resolveWiki(name);
       if (!result.ok) {
         console.error(chalk.red(result.error));
+        process.exit(1);
+      }
+
+      if (opts.type && opts.type !== 'knowledge' && opts.type !== 'recipe') {
+        console.error(
+          chalk.red(
+            `Invalid --type "${opts.type}". Must be "knowledge" or "recipe".`,
+          ),
+        );
         process.exit(1);
       }
 
@@ -111,6 +151,7 @@ const initCommand = new Command('init')
       if (opts.description) fields.description = opts.description;
       if (opts.language) fields.language = opts.language;
       if (opts.wikiContext) fields.wikiContext = opts.wikiContext;
+      if (opts.type) fields.type = opts.type;
 
       await patchConfig(wikiPath, fields);
 
