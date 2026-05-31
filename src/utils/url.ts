@@ -27,6 +27,12 @@ const normalizeYouTube = (url: URL): string => {
     return `https://youtube.com/watch?v=${videoId}`;
   }
 
+  // YouTube Shorts: /shorts/<id>
+  const shortsMatch = url.pathname.match(/^\/shorts\/([^/?]+)/);
+  if (shortsMatch) {
+    return `https://youtube.com/watch?v=${shortsMatch[1]}`;
+  }
+
   const videoId = url.searchParams.get('v');
   if (!videoId)
     throw new Error(`Could not extract YouTube video ID from: ${url.href}`);

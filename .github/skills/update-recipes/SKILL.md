@@ -83,7 +83,7 @@ Configuration (wiki path, etc.) is loaded automatically. No setup required.
    ENDJSON
    npm run dev -- apply tmp/wiki-apply.json --json [--wiki <name>]
 
-   Use a heredoc with a quoted delimiter (`'ENDJSON'`) so all content is treated literally — no issues with apostrophes, `$`, or special characters. NEVER use `echo '<json>'`.
+   Use a heredoc with a quoted delimiter (`'ENDJSON'`) so all content is treated literally — no issues with apostrophes, `$`, or special characters. NEVER use `echo`, `printf`, or any other command to write the JSON — heredoc ONLY.
 
    IMPORTANT — valid JSON inside the heredoc: any literal double-quote (`"`) inside `content` MUST be escaped as `\"`. Use single quotes or em-dashes in prose to avoid this.
 
