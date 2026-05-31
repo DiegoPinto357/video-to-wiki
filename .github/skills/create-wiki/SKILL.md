@@ -27,20 +27,31 @@ npm run dev -- <command>
    - Example: `/Users/john/Documents/MyWiki` or a Google Drive / iCloud path.
    - Confirm with the user: "Will this wiki be stored at `<path>`? (yes/no)"
 
-   c. **Description** (1–2 sentences describing what this wiki is about)
-   - Example: "A personal knowledge base about cooking and recipes."
-
-   d. **Language** (optional — the language all wiki content will be written in, defaults to `en-US`)
+   c. **Language** (the language all wiki content will be written in, defaults to `en-US`)
    - Example: `pt-BR`, `en-US`, `es`
    - If the user skips this, use `en-US`.
+   - **Ask language BEFORE description and context** — all suggestions below will be written in this language.
 
-   e. **Wiki context** (a more detailed description to guide the AI agent — what topics, what NOT to tag, what's the scope)
-   - Example: "This wiki covers family recipes passed down through generations. Avoid generic tags like 'food' or 'cooking'. Focus on specific dishes, techniques, and ingredients."
-
-   f. **Wiki type** — ask: "Is this a knowledge wiki or a recipe wiki?"
+   d. **Wiki type** — ask: "Is this a knowledge wiki or a recipe wiki?"
    - `knowledge` (default): knowledge base where multiple videos can contribute to the same document.
    - `recipe`: strict 1:1 — one video always produces one recipe document, with a fixed recipe template.
    - If the user is unsure, briefly explain the difference and ask again.
+
+   e. **Description** (1–2 sentences describing what this wiki is about)
+   - Based on the wiki name, path, language, and type, **draft a suggestion in the wiki's language** and present it to the user.
+   - Present exactly these options:
+     1. ✅ Accept as-is
+     2. ✏️ Accept but suggest changes (ask what to change, revise, and confirm again)
+     3. ✍️ Type my own
+   - Use the final accepted text as the description.
+
+   f. **Wiki context** (a more detailed description to guide the AI agent — what topics, what NOT to tag, what's the scope)
+   - Based on everything collected so far, **draft a suggestion in the wiki's language** and present it to the user.
+   - Present exactly these options:
+     1. ✅ Accept as-is
+     2. ✏️ Accept but suggest changes (ask what to change, revise, and confirm again)
+     3. ✍️ Type my own
+   - Use the final accepted text as the wiki context.
 
 3. Once all information is collected, summarize it to the user:
 
