@@ -20,7 +20,7 @@ CLI tool that ingests YouTube and Instagram videos into an [Obsidian](https://ob
 | [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | See below                         |
 | Playwright Chromium                                         | `npx playwright install chromium` |
 
-> **Note:** yt-dlp, ffmpeg, faster-whisper, and Playwright are only required for Instagram ingestion. YouTube videos use the native transcript API and only fall back to Whisper when no captions are available.
+> **Note:** yt-dlp, ffmpeg, faster-whisper, and Playwright are only required for Instagram ingestion. YouTube uses yt-dlp for metadata only, the native transcript API for captions, and only falls back to Whisper when no captions are available.
 
 ## Setup
 
@@ -65,6 +65,8 @@ Open `<wiki-folder>/_inbox/links.md` and add URLs — one per line:
 https://youtube.com/watch?v=dQw4w9WgXcQ
 https://www.instagram.com/reel/ABC123/
 ```
+
+> **YouTube:** If you get bot-detection errors, run `npm run dev -- auth youtube` to authenticate with your Google account.
 
 ### 2. Run the update-wiki skill
 
@@ -127,13 +129,15 @@ Tags use [Obsidian inline tag syntax](https://help.obsidian.md/Editing+and+forma
     └── backup/docs/      ← Versioned doc backups
 ```
 
-A shared profile directory at `~/.video-to-wiki/` stores the wiki registry and Instagram session (shared across all wikis):
+A shared profile directory at `~/.video-to-wiki/` stores the wiki registry and provider sessions (shared across all wikis):
 
 ```
 ~/.video-to-wiki/
-├── wikis.json            ← Registry of all wikis + active wiki
-├── browser-state/        ← Playwright session for Instagram
-└── instagram-cookies.txt
+├── wikis.json               ← Registry of all wikis + active wiki
+├── browser-state/           ← Playwright session for Instagram
+├── instagram-cookies.txt    ← Instagram cookies for yt-dlp
+├── youtube-browser-state/   ← Playwright session for YouTube
+└── youtube-cookies.txt      ← YouTube cookies for yt-dlp
 ```
 
 ---
@@ -160,6 +164,7 @@ npm run dev -- wiki config set <key> <value> [--wiki <name>]  # Update a config 
 ```bash
 npm run dev -- ingest [--wiki <name>]                 # Ingest links from inbox
 npm run dev -- auth instagram                         # Authenticate Instagram manually
+npm run dev -- auth youtube                           # Authenticate YouTube manually
 ```
 
 ### Source management

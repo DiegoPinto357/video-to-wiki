@@ -1,9 +1,11 @@
 import { Command } from 'commander';
 import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
 import chalk from 'chalk';
 import { chromium } from 'playwright';
 import { profileDir } from '../utils/registry';
 import { instagramCookiesPath, browserStatePath } from '../providers/instagram';
+import { youtubeCookiesPath } from '../providers/youtube';
 
 type PlaywrightCookie = {
   name: string;
@@ -79,6 +81,58 @@ const instagramCommand = new Command('instagram')
     console.log(chalk.green('You can now ingest Instagram links.'));
   });
 
+export const runYoutubeAuth = async (): Promise<void> => {
+  console.log(chalk.cyan('Opening YouTube login page...'));
+  console.log(
+    chalk.yellow(
+      'Log in to YouTube/Google in the browser window. It will close automatically once you are logged in.\n',
+    ),
+  );
+
+  const statePath = join(profileDir, 'youtube-browser-state');
+  await mkdir(statePath, { recursive: true });
+
+  const context = await chromium.launchPersistentContext(statePath, {
+    headless: false,
+  });
+
+  const page = await context.newPage();
+  await page.goto('https://accounts.google.com/signin');
+  await page.bringToFront();
+
+  await page.waitForURL(
+    url => {
+      const u = url.toString();
+      return (
+        !u.includes('/accounts/signin') &&
+        !u.includes('/accounts/ServiceLogin') &&
+        !u.includes('/challenge')
+      );
+    },
+    { timeout: 180_000 },
+  );
+
+  await page.waitForTimeout(2000);
+
+  // Export session cookies to Netscape format for yt-dlp
+  const cookies = await context.cookies(['https://www.youtube.com', 'https://accounts.google.com']);
+  await context.close();
+
+  const cookiesTxt = toCookiesTxt(cookies as PlaywrightCookie[]);
+  await writeFile(youtubeCookiesPath(), cookiesTxt, 'utf-8');
+
+  console.log(chalk.green('✓ YouTube session saved.\n'));
+  console.log(chalk.dim(`  Stored in: ${profileDir}`));
+};
+
+const youtubeCommand = new Command('youtube')
+  .description('Log in to YouTube and save session for ingestion')
+  .action(async () => {
+    await runYoutubeAuth();
+    console.log(chalk.green('You can now ingest YouTube links.'));
+  });
+
 export const authCommand = new Command('auth')
   .description('Authenticate with external providers')
-  .addCommand(instagramCommand);
+  .addCommand(instagramCommand)
+  .addCommand(youtubeCommand);

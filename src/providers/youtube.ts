@@ -1,13 +1,26 @@
 import { spawn } from 'child_process';
+import { access } from 'fs/promises';
 import chalk from 'chalk';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { transcribeWithWhisper } from '../transcription/whisper';
+import { profileDir } from '../utils/registry';
 import type { SourceData } from '../types';
 
 type YtDlpMeta = {
   title?: string;
   description?: string;
 };
+
+const AUTH_ERROR_PATTERNS = [
+  '429',
+  'too many requests',
+  'sign in to confirm',
+  'confirm you\'re not a bot',
+  'visitor data',
+];
+
+const isAuthRequired = (msg: string): boolean =>
+  AUTH_ERROR_PATTERNS.some(p => msg.toLowerCase().includes(p.toLowerCase()));
 
 const runYtDlp = (args: string[]): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -28,28 +41,37 @@ const runYtDlp = (args: string[]): Promise<string> =>
     });
   });
 
-const isRateLimit = (err: unknown): boolean => {
-  const msg = err instanceof Error ? err.message : String(err);
-  return msg.includes('429') || msg.toLowerCase().includes('too many requests');
-};
+export const youtubeCookiesPath = () =>
+  `${profileDir}/youtube-cookies.txt`;
 
 const fetchMeta = async (url: string): Promise<string> => {
   const baseArgs = ['--dump-json', '--no-download'];
+  const cookiesFile = youtubeCookiesPath();
+
   try {
     return await runYtDlp([...baseArgs, url]);
   } catch (err) {
-    if (isRateLimit(err)) {
-      console.log(
-        chalk.gray('  → Rate limited, retrying with Chrome cookies...'),
-      );
-      return await runYtDlp([
-        ...baseArgs,
-        '--cookies-from-browser',
-        'chrome',
-        url,
-      ]);
+    const msg = err instanceof Error ? err.message : String(err);
+    if (!isAuthRequired(msg)) throw err;
+
+    // Try cookies file first, then fall back to browser cookies
+    try {
+      await access(cookiesFile);
+      console.log(chalk.gray('  → Auth required, retrying with saved cookies...'));
+      return await runYtDlp([...baseArgs, '--cookies', cookiesFile, url]);
+    } catch {
+      // No cookies file, try browser cookies
     }
-    throw err;
+
+    console.log(
+      chalk.gray('  → Auth required, retrying with Chrome cookies...'),
+    );
+    return await runYtDlp([
+      ...baseArgs,
+      '--cookies-from-browser',
+      'chrome',
+      url,
+    ]);
   }
 };
 
